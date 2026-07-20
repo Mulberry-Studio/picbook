@@ -1836,6 +1836,7 @@
           <details class="toolbar-popover about-popover" id="aboutPopover">
             <summary id="aboutSummary">关于</summary>
             <div class="popover-body">
+              <p id="aboutVersionText">版本：Rev0.1，仅 PC 端。</p>
               <p id="aboutLocalText">本工具是一个单文件、纯静态的本地图画书编辑工具。当前版本主要由一个 book_app.html 文件运行，不依赖服务器后端、数据库或云端处理服务。</p>
               <p id="aboutPrivacyText">用户导入的照片、字体、背景图、项目文件等内容均在浏览器本地处理。工具不会主动上传、传输、收集或保存用户文件到任何服务器，也不包含用户账号系统或远程隐私数据分析功能。</p>
               <p id="aboutStorageText">本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器本地存储、下载文件、打印导出等行为由用户本机浏览器完成。如需重新编辑项目或留存项目，请自行妥善保存项目文件、原始照片、字体文件和导出的印刷文件。</p>
@@ -1978,9 +1979,10 @@ const I18N = {
     delPage: '－ 删除页面',
     tocPage: '目录页',
     about: '关于',
+    aboutVersionText: '版本：Rev0.1，仅 PC 端。',
     aboutLocalText: '本工具是一个单文件、纯静态的本地图画书编辑工具。当前版本主要由一个 book_app.html 文件运行，不依赖服务器后端、数据库或云端处理服务。',
     aboutPrivacyText: '用户导入的照片、字体、背景图、项目文件等内容均在浏览器本地处理。工具不会主动上传、传输、收集或保存用户文件到任何服务器，也不包含用户账号系统或远程隐私数据分析功能。',
-    aboutStorageText: '本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器自动记忆仅保存轻量偏好设置；书本页面、照片、文字等项目内容请通过“文件 > 保存文件”保存。如需重新编辑项目或留存项目，请自行妥善保存项目文件、原始照片、字体文件和导出的印刷文件。',
+    aboutStorageText: '本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器自动记忆仅保存轻量偏好设置；书本页面、照片、文字等项目内容请通过“文件 > 保存文件”保存。大量照片会占用浏览器内存，建议分批导入和排版；如浏览器变慢，请先保存项目和原始照片，再刷新或重新打开页面。',
     aiAssistant: 'AI 帮助助手',
     aiAssistantTitle: '帮助问答',
     aiAssistantPlaceholder: '问一个编辑器问题',
@@ -2074,9 +2076,10 @@ const I18N = {
     delPage: '- Delete Page',
     tocPage: 'TOC Page',
     about: 'About',
+    aboutVersionText: 'Version: Rev0.1, PC only.',
     aboutLocalText: 'This tool is a single-file, fully static, local picturebook editor. The current version mainly runs from one book_app.html file and does not depend on a server backend, database, or cloud processing service.',
     aboutPrivacyText: 'Photos, fonts, background images, project files, and other user-imported content are processed locally in the browser. The tool does not actively upload, transmit, collect, or save user files to any server, and it does not include user accounts or remote privacy-data analytics.',
-    aboutStorageText: 'This page runs as a static webpage. Files imported into the page are read and processed only by the current browser. Automatic browser memory saves only lightweight preferences; save book pages, photos, text, and other project content through File > Save File. To edit or keep a project later, please save the project file, original photos, font files, and exported print files yourself.',
+    aboutStorageText: 'This page runs as a static webpage. Files imported into the page are read and processed only by the current browser. Automatic browser memory saves only lightweight preferences; save book pages, photos, text, and other project content through File > Save File. Large photo batches can use significant browser memory, so importing and laying out photos in batches is recommended. If the browser slows down, save the project and original photos first, then refresh or reopen the page.',
     aiAssistant: 'AI Help Assistant',
     aiAssistantTitle: 'Help Q&A',
     aiAssistantPlaceholder: 'Ask an editor question',
@@ -2496,6 +2499,7 @@ function applyLanguage() {
     delPageBtn.textContent = t('delPage');
     tocPageBtn.textContent = t('tocPage');
     document.getElementById('aboutSummary').textContent = t('about');
+    document.getElementById('aboutVersionText').textContent = t('aboutVersionText');
     document.getElementById('aboutLocalText').textContent = t('aboutLocalText');
     document.getElementById('aboutPrivacyText').textContent = t('aboutPrivacyText');
     document.getElementById('aboutStorageText').textContent = t('aboutStorageText');
