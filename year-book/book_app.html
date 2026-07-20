@@ -1982,7 +1982,7 @@ const I18N = {
     aboutVersionText: '版本：Rev0.1，仅 PC 端。',
     aboutLocalText: '本工具是一个单文件、纯静态的本地图画书编辑工具。当前版本主要由一个 book_app.html 文件运行，不依赖服务器后端、数据库或云端处理服务。',
     aboutPrivacyText: '用户导入的照片、字体、背景图、项目文件等内容均在浏览器本地处理。工具不会主动上传、传输、收集或保存用户文件到任何服务器，也不包含用户账号系统或远程隐私数据分析功能。',
-    aboutStorageText: '本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器自动记忆仅保存轻量偏好设置；书本页面、照片、文字等项目内容请通过“文件 > 保存文件”保存。大量照片会占用浏览器内存，建议分批导入和排版；如浏览器变慢，请先保存项目和原始照片，再刷新或重新打开页面。',
+    aboutStorageText: '本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器自动记忆仅保存轻量偏好设置；书本页面、照片、文字等项目内容请通过“文件 > 保存文件”保存。除封面、封底等少量重点页面外，不建议大量使用“导入背景用图片”作为页面背景：一是可能占用浏览器内存并导致变慢，二是可能明显增加印刷文件体积和印刷成本。',
     aiAssistant: 'AI 帮助助手',
     aiAssistantTitle: '帮助问答',
     aiAssistantPlaceholder: '问一个编辑器问题',
@@ -2079,7 +2079,7 @@ const I18N = {
     aboutVersionText: 'Version: Rev0.1, PC only.',
     aboutLocalText: 'This tool is a single-file, fully static, local picturebook editor. The current version mainly runs from one book_app.html file and does not depend on a server backend, database, or cloud processing service.',
     aboutPrivacyText: 'Photos, fonts, background images, project files, and other user-imported content are processed locally in the browser. The tool does not actively upload, transmit, collect, or save user files to any server, and it does not include user accounts or remote privacy-data analytics.',
-    aboutStorageText: 'This page runs as a static webpage. Files imported into the page are read and processed only by the current browser. Automatic browser memory saves only lightweight preferences; save book pages, photos, text, and other project content through File > Save File. Large photo batches can use significant browser memory, so importing and laying out photos in batches is recommended. If the browser slows down, save the project and original photos first, then refresh or reopen the page.',
+    aboutStorageText: 'This page runs as a static webpage. Files imported into the page are read and processed only by the current browser. Automatic browser memory saves only lightweight preferences; save book pages, photos, text, and other project content through File > Save File. Except for a few key pages such as the cover and back cover, avoid heavy use of imported background images as page backgrounds: they may use browser memory and slow the editor, and they may noticeably increase print-file size and printing cost.',
     aiAssistant: 'AI Help Assistant',
     aiAssistantTitle: 'Help Q&A',
     aiAssistantPlaceholder: 'Ask an editor question',
@@ -5478,26 +5478,10 @@ function choosePhotosForPage(page, count, photoList) {
 }
 
 function applyAutoLayout() {
-  if (!autoBgMapInput || autoLayoutRandomBgSelect.value === 'no') {
-    preferImportedAutoBackgroundMaps = false;
-    currentAutoBackgroundMaps = [];
-    runAutoLayout();
-    return;
-  }
-  const wantsMaps = window.confirm(lang() === 'en'
-    ? 'Import custom background maps before Auto Layout? Choose OK to select images, or Cancel to continue without custom maps.'
-    : '是否导入自选背景图谱？选择“确定”后请选择图片；选择“取消”将不使用自选图谱并直接排版。');
-  if (!wantsMaps) {
-    preferImportedAutoBackgroundMaps = false;
-    currentAutoBackgroundMaps = [];
-    runAutoLayout();
-    return;
-  }
-  pendingAutoLayoutAfterMapImport = true;
   preferImportedAutoBackgroundMaps = false;
   currentAutoBackgroundMaps = [];
-  autoBgMapInput.value = '';
-  autoBgMapInput.click();
+  pendingAutoLayoutAfterMapImport = false;
+  runAutoLayout();
 }
 
 function runAutoLayout() {
