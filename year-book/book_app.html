@@ -379,11 +379,14 @@
     color: var(--text); scrollbar-width: thin;
   }
   .page-nav button,
+  .page-nav > span,
+  .page-nav input,
   .page-nav .page-type-badge,
   .page-nav .toolbar-popover > summary {
-    font-family: var(--mono);
-    color: var(--button-glass-text);
-    text-shadow: 0 1px 0 var(--button-text-shadow);
+    font-family: var(--mono) !important;
+    font-weight: 700;
+    color: var(--button-glass-text) !important;
+    text-shadow: 0 1px 0 var(--button-text-shadow) !important;
   }
   .page-nav .popover-body,
   .page-nav .popover-body * {
@@ -1827,7 +1830,7 @@
                 </div>
               </div>
               <label class="check-row"><input type="checkbox" id="qualityFilterInput"> 忽略低质照片</label>
-              <button class="primary" id="autoLayoutBtn">自动排版</button>
+              <button class="primary" id="autoLayoutBtn">开始自动排版</button>
             </div>
           </details>
           <details class="toolbar-popover about-popover" id="aboutPopover">
@@ -1995,6 +1998,7 @@ const I18N = {
     preview3d: '实体书 3D 预览',
     photoLibrary: '备选照片库',
     autoLayout: '自动排版',
+    startAutoLayout: '开始自动排版',
     template: '模板',
     scope: '排版范围',
     layoutRule: '排版原则',
@@ -2090,6 +2094,7 @@ const I18N = {
     preview3d: '3D Book Preview',
     photoLibrary: 'Picture Library',
     autoLayout: 'Auto Layout',
+    startAutoLayout: 'Start Auto Layout',
     template: 'Template',
     scope: 'Layout Scope',
     layoutRule: 'Layout Rule',
@@ -2251,8 +2256,6 @@ let autoBackgroundMaps = [];
 let currentAutoBackgroundMaps = [];
 let pendingAutoLayoutAfterMapImport = false;
 let preferImportedAutoBackgroundMaps = false;
-let autoLayoutMapImportFocusTimer = null;
-let autoLayoutMapImportInProgress = false;
 const DEFAULT_UI_STATE = { language: 'zh', photoLibraryX: 0, photoLibraryY: 0, photoLibraryWidth: 224, photoLibraryHeight: null, brushType: 'hard', brushColor: '#2d2922', brushSize: 4, drawMode: 'handwriting', layoutTemplate: 'feature', autoLayoutScope: 'current', autoLayoutMode: 'time', autoLayoutMax: 5, autoLayoutRandomFrame: 'yes', autoLayoutRandomBg: 'yes', autoLayoutRandomText: 'yes', qualityFilter: false };
 let uiState = { ...DEFAULT_UI_STATE };
 let storageSaveTimer = null;
@@ -2529,7 +2532,7 @@ function applyLanguage() {
   document.getElementById('autoLayoutRandomBgLabel').textContent = t('randomBg');
   document.getElementById('autoLayoutRandomTextLabel').textContent = t('randomText');
   qualityFilterInput.parentElement.lastChild.textContent = ' ' + t('qualityFilter');
-  autoLayoutBtn.textContent = t('autoLayout');
+  autoLayoutBtn.textContent = t('startAutoLayout');
   trayHint.textContent = t('trayHint');
   bookPrevBtn.textContent = t('bookPrev');
   bookNextBtn.textContent = t('bookNext');
@@ -4686,11 +4689,6 @@ bgImageInput.addEventListener('change', async () => {
     autoBgMapInput.value = '';
     const shouldRunAutoLayout = pendingAutoLayoutAfterMapImport;
     pendingAutoLayoutAfterMapImport = false;
-    autoLayoutMapImportInProgress = true;
-    if (autoLayoutMapImportFocusTimer) {
-      clearTimeout(autoLayoutMapImportFocusTimer);
-      autoLayoutMapImportFocusTimer = null;
-    }
   let count = 0;
   try {
       if (files.length) {
@@ -4712,7 +4710,6 @@ bgImageInput.addEventListener('change', async () => {
         ? 'Some background maps could not be imported. Auto Layout has not started.'
         : '部分背景图谱导入失败，本轮自动排版未开始。';
     } finally {
-      autoLayoutMapImportInProgress = false;
       if (shouldRunAutoLayout) {
       if (count) {
         runAutoLayout();
@@ -4829,7 +4826,11 @@ previewFullscreenBtn.addEventListener('click', () => {
   resetStPageFlipPreview();
   renderBookPreview();
 });
-autoLayoutBtn.addEventListener('click', applyAutoLayout);
+autoLayoutBtn.addEventListener('click', () => {
+  const autoLayoutPopover = document.getElementById('autoLayoutPopover');
+  if (autoLayoutPopover) autoLayoutPopover.open = false;
+  applyAutoLayout();
+});
 printPdfBtn.addEventListener('click', outputPrintFile);
 
 document.addEventListener('keydown', (e) => {
@@ -5488,29 +5489,11 @@ function applyAutoLayout() {
     runAutoLayout();
     return;
   }
-  if (autoLayoutMapImportFocusTimer) {
-    clearTimeout(autoLayoutMapImportFocusTimer);
-    autoLayoutMapImportFocusTimer = null;
-  }
   pendingAutoLayoutAfterMapImport = true;
   preferImportedAutoBackgroundMaps = false;
   currentAutoBackgroundMaps = [];
   autoBgMapInput.value = '';
   autoBgMapInput.click();
-  window.addEventListener('focus', () => {
-    if (autoLayoutMapImportFocusTimer) clearTimeout(autoLayoutMapImportFocusTimer);
-    autoLayoutMapImportFocusTimer = setTimeout(() => {
-      autoLayoutMapImportFocusTimer = null;
-      if (!pendingAutoLayoutAfterMapImport) return;
-      if (autoLayoutMapImportInProgress) return;
-      pendingAutoLayoutAfterMapImport = false;
-      preferImportedAutoBackgroundMaps = false;
-      currentAutoBackgroundMaps = [];
-      hint.textContent = lang() === 'en'
-        ? 'Background map import was canceled; Auto Layout has not started.'
-        : '已取消导入背景图谱，本轮自动排版未开始。';
-    }, 1800);
-  }, { once: true });
 }
 
 function runAutoLayout() {
