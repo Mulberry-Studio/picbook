@@ -1,0 +1,12 @@
+# Keep the Pages repo focused on the static app.
+*
+!/.gitignore
+!/.nojekyll
+!/README.md
+!/index.html
+!/year-book/
+/year-book/*
+!/year-book/book_app.html
+!/year-book/page-flip.browser.min.js
+!/year-book/assets/
+!/year-book/assets/*.png
