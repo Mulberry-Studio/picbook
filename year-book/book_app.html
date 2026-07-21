@@ -823,16 +823,6 @@
       top: -34px;
       transform: none;
     }
-  .page-meta {
-    max-width: 720px;
-    margin: -76px 34px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    position: relative;
-    z-index: 1100;
-    pointer-events: auto;
-  }
   .drawing-layer {
     position: absolute; inset: 0; width: 100%; height: 100%; z-index: 180; pointer-events: none; overflow: visible;
   }
@@ -840,8 +830,6 @@
   .page-frame.drawing-active { cursor: crosshair; }
   .page-frame.drawing-active .drawing-layer { pointer-events: auto; }
   .draw-path { fill: none; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-  .page-meta textarea { width: 100%; min-height: 52px; resize: vertical; font-size: 14px; line-height: 1.55; }
-  .page-meta-label { font-size: 13px; color: var(--muted); font-family: var(--mono); font-weight: 650; }
   .page-actions { max-width: 720px; margin: 12px 26px 0; display: flex; gap: 10px; flex-wrap: wrap; }
 
   .hint-row { margin-top: 10px; font-size: 12px; color: var(--muted); font-weight: 560; }
@@ -1254,16 +1242,17 @@
     position: relative;
   }
   html[data-layout-mode="tablet"] .page-nav {
-    position: fixed;
-    left: max(12px, env(safe-area-inset-left));
-    right: max(12px, env(safe-area-inset-right));
-    bottom: calc(12px + env(safe-area-inset-bottom));
-    top: auto;
-    z-index: 2550;
+    position: absolute;
+    left: 50%;
+    right: auto;
+    top: 8px;
+    bottom: auto;
+    transform: translateX(-50%);
+    z-index: 1900;
     display: flex;
     flex-wrap: nowrap;
-    justify-content: center;
-    max-width: none;
+    justify-content: flex-start;
+    max-width: calc(100% - 24px);
     width: auto;
     padding: 7px;
     border-radius: 14px;
@@ -1271,12 +1260,10 @@
     border: 1px solid rgba(155,126,91,.28);
     box-shadow: 0 12px 24px rgba(91,62,35,.10);
     backdrop-filter: blur(8px);
-    overflow-x: visible;
+    overflow-x: auto;
     margin: 0;
   }
-  html[data-layout-mode="tablet"] .page-nav .page-type-badge,
-  html[data-layout-mode="tablet"] .page-nav .page-jump,
-  html[data-layout-mode="tablet"] .page-nav > span {
+  html[data-layout-mode="tablet"] .page-nav .page-type-badge {
     display: none;
   }
   html[data-layout-mode="tablet"] .preview-3d .page-nav {
@@ -1291,6 +1278,7 @@
     justify-content: flex-start;
     overflow-x: auto;
     margin-bottom: 6px;
+    transform: none;
   }
   html[data-layout-mode="tablet"] .page-wrap {
     padding: 22px 14px;
@@ -1302,25 +1290,9 @@
     width: 54px;
     height: 72px;
   }
-  html[data-layout-mode="tablet"] .page-meta {
-    max-width: 720px;
-    margin: -76px 34px 10px;
-    position: relative;
-    z-index: 1100;
-    pointer-events: auto;
-  }
-  html[data-layout-mode="tablet"] .page-meta-label {
-    font-size: 14px;
-  }
-  html[data-layout-mode="tablet"] .page-meta textarea {
-    min-height: 54px;
-    font-size: 16px;
-    background: rgba(255,250,241,.78);
-    backdrop-filter: blur(7px);
-  }
   html[data-layout-mode="tablet"] .photo-library {
     min-width: 168px;
-    max-width: 42vw;
+    max-width: min(42vw, calc(100vw - 188px));
     position: sticky;
     top: 146px;
     transform: none !important;
@@ -1345,7 +1317,8 @@
   html[data-layout-mode="tablet"] .page-nav .toolbar-popover .popover-body,
   html[data-layout-mode="tablet"] .page-nav .ai-assistant-body {
     top: auto;
-    bottom: calc(76px + env(safe-area-inset-bottom));
+    bottom: auto;
+    top: 92px;
     max-height: min(70vh, 520px);
   }
   html[data-layout-mode="tablet"] .tray-item {
@@ -1383,9 +1356,6 @@
   html[data-layout-mode="tablet"] .preview-3d.fullscreen .st-pageflip-book {
     width: min(98vw, 1540px);
     height: min(94vh, 1040px);
-  }
-  html[data-layout-mode="tablet"] .st-pageflip-book {
-    pointer-events: none;
   }
 
   @media print {
@@ -2012,7 +1982,7 @@
                 <div class="field">
                   <label id="layoutTemplateLabel">模板</label>
                   <select id="layoutTemplateSelect" title="自动排版模板">
-                    <option value="feature">主图 + 页注</option>
+                    <option value="feature">主图展示</option>
                     <option value="grid4">四宫格</option>
                     <option value="mosaic">拼贴混排</option>
                     <option value="strip">横向故事带</option>
@@ -2097,12 +2067,6 @@
           <button class="page-turn-edge prev" id="pageEdgePrevBtn" title="上一页" aria-label="上一页"></button>
           <div class="page-frame" id="pageFrame"></div>
           <button class="page-turn-edge next" id="pageEdgeNextBtn" title="下一页" aria-label="下一页"></button>
-        </div>
-        <div class="page-meta">
-          <div>
-            <div class="page-meta-label">页注</div>
-            <textarea id="footnoteInput" placeholder="给这一页写点文字，会显示在页面下方。"></textarea>
-          </div>
         </div>
         <div class="page-actions">
           <select id="printFormatSelect" title="输出格式">
@@ -2241,8 +2205,6 @@ const I18N = {
     aiQuickSave: '保存文件',
     lockPage: '锁定',
     unlockPage: '解锁',
-    footnoteLabel: '页注',
-    footnotePlaceholder: '给这一页写点文字，会显示在页面下方。',
     outputFile: '输出印刷文件',
     preview3d: '实体书 3D 预览',
     photoLibrary: '备选照片库',
@@ -2340,8 +2302,6 @@ const I18N = {
     aiQuickSave: 'Save File',
     lockPage: 'Lock',
     unlockPage: 'Unlock',
-    footnoteLabel: 'footnote',
-    footnotePlaceholder: 'Write a note for this page; it appears below the page.',
     outputFile: 'Export Print File',
     preview3d: '3D Book Preview',
     photoLibrary: 'Picture Library',
@@ -2413,7 +2373,6 @@ const aiAssistantAskBtn = document.getElementById('aiAssistantAskBtn');
 const aiAssistantAnswer = document.getElementById('aiAssistantAnswer');
 const bgRangeInput = document.getElementById('bgRangeInput');
 const applyBgRangeBtn = document.getElementById('applyBgRangeBtn');
-const footnoteInput = document.getElementById('footnoteInput');
 const pageNumberInput = document.getElementById('pageNumberInput');
 const addTextBtn = document.getElementById('addTextBtn');
 const fontFamilySelect = document.getElementById('fontFamilySelect');
@@ -2474,6 +2433,8 @@ const turnPage = document.getElementById('turnPage');
 const turnFront = document.getElementById('turnFront');
 const turnBack = document.getElementById('turnBack');
 const exportPages = document.getElementById('exportPages');
+let manualPhotoShadowDefault = photoShadowSelect ? photoShadowSelect.value : 'none';
+let manualPhotoFrameDefault = photoFrameSelect ? photoFrameSelect.value : '';
 
 // ---- 应用状态 ----
 let photos = [];
@@ -2620,7 +2581,7 @@ const HELP_QA = {
     { keys: ['照片', '导入', '拖', '图库', '备选', '回库'], answer: '导入照片后会进入右侧备选照片库。把照片拖到当前页面即可放入；放入或自动排版使用后，会从图库移除。页面照片可点悬浮工具里的“回库”放回图库重新调整。' },
     { keys: ['移动', '位置', '大小', '缩放', '旋转', '裁切', '圆点', '右下', '+', '-', '重置'], answer: '选中页面照片后，可拖动照片框移动位置，拖右下圆点改变照片框大小，拖顶部圆点旋转。照片内悬浮工具可用方向箭头微调取景，+/- 缩放照片内容，重置恢复取景，回库放回备选库，删除则从页面移除。' },
     { keys: ['自动', '排版', '模板', '上限', '随机', '锁定'], answer: '在备选照片库里设置模板、范围、排版原则、每页照片上限、随机边框/随机背景/随机文字和低质照片过滤，然后点击“自动排版”。全书排版会跳过锁定页面，并尽量按顺序分配照片。' },
-    { keys: ['模板', '主图', '四宫格', '拼贴', '故事带', '手账'], answer: '自动排版模板大致为：主图+页注适合突出一张照片；四宫格适合整齐比较；拼贴混排更活泼；横向故事带适合时间推进；照片+手账文字会预留说明文字区域。系统会在模板内随机变化照片张数、位置和边框。' },
+    { keys: ['模板', '主图', '四宫格', '拼贴', '故事带', '手账'], answer: '自动排版模板大致为：主图展示适合突出一张照片；四宫格适合整齐比较；拼贴混排更活泼；横向故事带适合时间推进；照片+手账文字会预留说明文字区域。系统会在模板内随机变化照片张数、位置和边框。' },
     { keys: ['背景', '图谱', '颜色', '多页', '范围', '自选背景', '导入背景'], answer: '页面背景可选单色、油画/图案风格或自选背景。导入背景用图片会转为低色素图谱，作为轻量背景纹理使用。背景页码范围只按内页计算，不含封面、封二、封三、封底；填写如 1-10,12 后点“多页背景”。' },
     { keys: ['调色', '调色板', '色块', '色系', '圆点'], answer: '选择背景色或工作台背景色时，先点颜色框打开浏览器调色板，再拖动调色板里的圆点选择具体色块；确认后当前页面或工作台会立即更新。' },
     { keys: ['背景变幻', '换图案', '变化', '随机背景'], answer: '“背景变幻”用于油画和图案背景：在当前背景风格和颜色倾向附近生成新的纹理、明暗和图案变化；单色背景主要由颜色框控制，自选背景则优先使用导入图谱。' },
@@ -2631,7 +2592,7 @@ const HELP_QA = {
     { keys: ['保存', '文件', '打开', '完整', '轻量'], answer: '“文件”里可打开或保存项目。完整保存会嵌入照片，文件较大但更可靠；轻量保存会压缩预览，文件较小，但最终印刷前要保留原照片文件夹并核对清晰度。' },
     { keys: ['输出', 'pdf', 'png', '印刷', '打印'], answer: '底部可选择 PDF、PDF/X-1a、PDF/X-4 或单页 PNG。输出按当前开本和页面内容生成；轻量项目输出前会提醒检查原图质量。空白页提示和未编辑示例文字不会输出。' },
     { keys: ['3d', '3-D', '预览', '翻页', '自动翻页', '全屏'], answer: '点击“实体书 3D 预览”可查看翻书效果。上一页/下一页按方向翻动；自动翻页再次点击会停止，间隔按秒设置；全屏按钮可进入或退出沉浸预览，Esc 也可退出。' },
-    { keys: ['页码', '页注', 'footnote', '页面', '调序', '顺序'], answer: '内页页码从 1 开始，封面、封二、封三、封底不计入内页。页码可在页面中直接点击修改；输入 1 到最大内页数之间的数字会移动整页并自动重排其他页码，超出范围则不执行。页注会显示在当前页面下方。' },
+    { keys: ['页码', '页面', '调序', '顺序'], answer: '内页页码从 1 开始，封面、封二、封三、封底不计入内页。页码可在页面中直接点击修改；输入 1 到最大内页数之间的数字会移动整页并自动重排其他页码，超出范围则不执行。' },
     { keys: ['撤回', '重做', 'undo', 'redo'], answer: 'Undo/Redo 可回撤或重做最近 3 次书本编辑操作。新编辑会重新开始 redo 路径。' },
     { keys: ['锁定', 'unlock', 'lock'], answer: '锁定页面后，重新运行自动排版不会改变该页；需要修改或重新排版时先解锁。' },
     { keys: ['删除页', '增加页', '页数', '双面'], answer: '增加和删除内页按双面印刷逻辑成对处理。删除页会一次删除两页，并会先警告；删除前请把要保留的照片回收到备选图库。' },
@@ -2651,7 +2612,7 @@ const HELP_QA = {
     { keys: ['save', 'file', 'open', 'full', 'light'], answer: 'Use File to open or save projects. Full Save embeds photos and is larger but more reliable. Light Save compresses previews and is smaller, but keep the original photo folder and verify quality before final printing.' },
     { keys: ['export', 'pdf', 'png', 'print'], answer: 'At the bottom, choose PDF, PDF/X-1a, PDF/X-4, or Single Page PNG. Export uses the current book size and content. Empty-page hints and unedited template sample text are never exported.' },
     { keys: ['3d', 'preview', 'flip', 'auto flip', 'fullscreen'], answer: 'Use 3D Book Preview to see the book flip. Previous/Next turn in that direction. Auto Flip toggles on/off, the interval is set in seconds, and Fullscreen enters or exits immersive preview; Esc also exits.' },
-    { keys: ['page number', 'footnote', 'note', 'page', 'reorder', 'order'], answer: 'Inner page numbers start at 1. Cover, inside front, inside back, and back cover do not count as inner pages. Click a page number and enter a number from 1 to the max inner page count to move that whole page and renumber the others. Out-of-range values are ignored. Footnotes appear below the page.' },
+    { keys: ['page number', 'page', 'reorder', 'order'], answer: 'Inner page numbers start at 1. Cover, inside front, inside back, and back cover do not count as inner pages. Click a page number and enter a number from 1 to the max inner page count to move that whole page and renumber the others. Out-of-range values are ignored.' },
     { keys: ['undo', 'redo'], answer: 'Undo/Redo can reverse or redo the last 3 book edits. A new edit resets the redo path.' },
     { keys: ['lock', 'unlock'], answer: 'Locked pages are preserved when Auto Layout runs again. Unlock a page before changing or relayouting it.' },
     { keys: ['delete page', 'add page', 'double-sided'], answer: 'Add/Delete inner pages follow paired double-sided book logic. Delete Page removes two pages at once and warns first; return photos you want to keep to the library before confirming.' },
@@ -2772,8 +2733,6 @@ function applyLanguage() {
     aiQuickButtons[2].dataset.aiQuestion = lang() === 'en' ? 'How do I save a project?' : '怎么保存文件？';
   }
   if (book) pageLockBtn.textContent = book.pages[currentPageIdx] && book.pages[currentPageIdx].locked ? t('unlockPage') : t('lockPage');
-  document.querySelector('.page-meta-label').textContent = t('footnoteLabel');
-  footnoteInput.placeholder = t('footnotePlaceholder');
   printPdfBtn.textContent = t('outputFile');
   preview3dBtn.textContent = t('preview3d');
   document.querySelector('.photo-library-title').textContent = t('photoLibrary');
@@ -2878,7 +2837,7 @@ function applyLanguage() {
   setOptionText(layoutTemplateSelect, lang() === 'en' ? {
     feature: 'Hero + captions', grid4: 'Four-grid', mosaic: 'Collage mix', strip: 'Story strip', diary: 'Photos + journal',
   } : {
-    feature: '主图 + 页注', grid4: '四宫格', mosaic: '拼贴混排', strip: '横向故事带', diary: '照片 + 手账文字',
+    feature: '主图展示', grid4: '四宫格', mosaic: '拼贴混排', strip: '横向故事带', diary: '照片 + 手账文字',
   });
   document.querySelector('.help-body').innerHTML = lang() === 'en' ? `
     <p><b>Quick Start</b>: import photos, drag them from the Photo Library onto the current page, then move, resize, crop, rotate, frame, caption, and preview the book.</p>
@@ -2897,7 +2856,7 @@ function applyLanguage() {
     <p><b>3D Preview</b>: preview the closed book, page turns, auto flip, timed interval, and fullscreen mode. Click Fullscreen again or press Esc to exit.</p>
     <p><b>Export</b>: choose PDF, PDF/X-1a, PDF/X-4, or Single Page PNG. Empty-page hints and unedited template sample text are never printed/exported.</p>
     <p><b>Memory</b>: the browser remembers lightweight preferences such as language, layout mode, workspace color, page size, and library panel position. Use File > Save File for book pages, photos, text, and imported assets.</p>` : `
-    <p><b>快速开始</b>：导入照片，把备选照片库里的照片拖到当前页面，然后移动、缩放、裁切、旋转、加边框、加页注，并用实体书预览检查效果。</p>
+    <p><b>快速开始</b>：导入照片，把备选照片库里的照片拖到当前页面，然后移动、缩放、裁切、旋转、加边框，并用实体书预览检查效果。</p>
     <p><b>照片库</b>：导入照片后会进入右侧备选照片库；拖入书页或自动排版使用后会从图库移除。页面照片可用“回库”放回图库，方便在不同页面之间重新调整。</p>
     <p><b>照片控制</b>：选中页面照片后，可拖动照片框移动位置，拖右下圆点改变照片框大小，拖顶部圆点旋转。照片内悬浮工具可用方向箭头微调取景，+/- 缩放照片内容，重置恢复取景，回库放回备选库，垃圾桶删除，换框按钮轮换边框。</p>
     <p><b>阴影 / 边框</b>：先选中页面照片，再在工具栏选择“阴影”或“边框”。下拉后可选“无阴影”或“无边框”清除效果。</p>
@@ -2906,7 +2865,7 @@ function applyLanguage() {
     <p><b>背景调色</b>：点击背景色或工作台背景色的颜色框，会打开浏览器调色板；拖动调色板里的圆点选定具体色块，确认后当前页或工作台立即更新。背景页码范围只按内页计算，不含封面、封二、封三、封底。</p>
     <p><b>背景变幻</b>：用于油画和图案背景，会在当前风格附近随机变化纹理、色彩和明暗。单色背景主要由颜色框决定；自选背景会优先使用导入的背景图谱。</p>
     <p><b>自选背景</b>：导入背景用图片会转为低色素图谱，效果更接近印刷图案背景，而不是整张高清照片，有助于减小项目和输出体积。填写内页范围后点“多页背景”可批量应用。</p>
-    <p><b>自动排版</b>：模板包括主图+页注、四宫格、拼贴混排、横向故事带、照片+手账文字。可选择当前页/全书、时间顺序/同一时段/地点、每页 1-9 张照片上限、随机边框/随机背景/随机文字和忽略低质照片；锁定页面会被跳过。</p>
+    <p><b>自动排版</b>：模板包括主图展示、四宫格、拼贴混排、横向故事带、照片+手账文字。可选择当前页/全书、时间顺序/同一时段/地点、每页 1-9 张照片上限、随机边框/随机背景/随机文字和忽略低质照片；锁定页面会被跳过。</p>
     <p><b>页面</b>：内页页码从 1 开始。直接点击页码并输入有效页数，可移动整页并自动重排其他内页页码。增加页面和删除页面都按双面印刷逻辑成对处理；删除页面会先警告，因为一次删除两页，请先把需要保留的照片放回备选库。</p>
     <p><b>复原</b>：当前页面只清空当前页；全书会重建当前项目书页；编辑器出厂设置会清除本地记忆、照片库、导入素材和工作台设置。每个选项都会要求确认。</p>
     <p><b>文件</b>：完整保存会把照片嵌入项目文件，文件较大但更可靠；轻量保存会压缩照片预览，文件较小，但最终输出印刷文件前应保留原照片文件夹并核对清晰度。</p>
@@ -3447,8 +3406,8 @@ function ensurePageDefaults(page, idx = 0) {
   if (!page.background.palette) page.background.palette = randomPainterPalette(page.background.style);
   if (isPainterStyle(page.background.style)) page.background.palette = page.background.palette || paletteFromColor(page.background.color || '#eae6dc', page.background.style);
   if (page.pageNumber == null) page.pageNumber = page.type === 'content' ? String(contentPageNumberForIndex(idx)) : '';
-  if (page.objects) page.objects.forEach((obj, objectIdx) => {
-    if (!obj.frame) obj.frame = PHOTO_FRAMES[objectIdx % PHOTO_FRAMES.length];
+  if (page.objects) page.objects.forEach(obj => {
+    if (obj.frame == null) obj.frame = '';
   });
 }
 
@@ -3565,10 +3524,20 @@ function loadImageUrl(url) {
 }
 
 function applyPhotoLibraryState() {
+  const tabletMode = uiState.layoutMode === 'tablet';
+  const maxWidth = tabletMode ? Math.max(168, Math.min(360, window.innerWidth - 188)) : 360;
+  uiState.photoLibraryWidth = Math.max(132, Math.min(maxWidth, uiState.photoLibraryWidth || 224));
+  if (tabletMode) {
+    uiState.photoLibraryX = 0;
+    uiState.photoLibraryY = 0;
+  }
   photoLibrary.style.setProperty('--photo-library-x', (uiState.photoLibraryX || 0) + 'px');
   photoLibrary.style.setProperty('--photo-library-y', (uiState.photoLibraryY || 0) + 'px');
   document.querySelector('.workspace-grid').style.setProperty('--photo-library-width', (uiState.photoLibraryWidth || 224) + 'px');
   if (uiState.photoLibraryHeight) {
+    const rect = photoLibrary.getBoundingClientRect();
+    const maxHeight = Math.max(170, window.innerHeight - rect.top - 18);
+    uiState.photoLibraryHeight = Math.max(150, Math.min(maxHeight, uiState.photoLibraryHeight));
     photoLibrary.style.setProperty('--photo-library-height', uiState.photoLibraryHeight + 'px');
     photoLibrary.style.setProperty('--photo-library-max-height', uiState.photoLibraryHeight + 'px');
   } else {
@@ -4794,11 +4763,6 @@ function parsePageRange(input, total) {
   updateJsonView();
 });
 
-footnoteInput.addEventListener('input', () => {
-  book.pages[currentPageIdx].footnote = footnoteInput.value;
-  updateJsonView();
-});
-
 if (pageNumberInput) {
   pageNumberInput.addEventListener('change', () => {
     const page = book.pages[currentPageIdx];
@@ -5074,9 +5038,10 @@ webBgColorInput.addEventListener('input', () => {
 });
 
 photoShadowSelect.addEventListener('input', () => {
+  manualPhotoShadowDefault = photoShadowSelect.value || 'none';
   const page = book.pages[currentPageIdx];
   const obj = getSelectedPhotoObject(page);
-  if (!obj) { hint.textContent = '请先点击书页中的照片，让它出现选中外框，再设置阴影。'; return; }
+  if (!obj) { hint.textContent = lang() === 'en' ? 'Default shadow updated for newly added photos.' : '已更新新加入照片的默认阴影。'; return; }
   obj.shadow = photoShadowSelect.value;
   renderPage();
   requestAnimationFrame(() => syncPhotoEffectSelectLabels(false));
@@ -5093,9 +5058,10 @@ applyPhotoFrameBtn.addEventListener('click', () => {
 });
 
 photoFrameSelect.addEventListener('input', () => {
+  manualPhotoFrameDefault = photoFrameSelect.value || '';
   const page = book.pages[currentPageIdx];
   const frameTarget = getSelectedFrameTarget(page);
-  if (!frameTarget) { hint.textContent = '请先点击书页中的照片或文字框，再设置边框。'; return; }
+  if (!frameTarget) { hint.textContent = lang() === 'en' ? 'Default frame updated for newly added photos.' : '已更新新加入照片的默认边框。'; return; }
   frameTarget.target.frame = photoFrameSelect.value;
   renderPage();
   requestAnimationFrame(() => syncPhotoEffectSelectLabels(false));
@@ -5224,6 +5190,7 @@ addTouchStart(photoLibraryResizeY, startPhotoLibraryHeightResize);
 function onPhotoLibraryDrag(e) {
   if (!photoLibraryDrag) return;
   if (photoLibraryDrag.type === 'move') {
+    if (uiState.layoutMode === 'tablet') return;
     const x = photoLibraryDrag.currentX + e.clientX - photoLibraryDrag.startX;
     const baseRect = photoLibrary.getBoundingClientRect();
     const proposedY = photoLibraryDrag.currentY + e.clientY - photoLibraryDrag.startY;
@@ -5236,12 +5203,15 @@ function onPhotoLibraryDrag(e) {
     applyPhotoLibraryState();
   } else {
     if (photoLibraryDrag.mode !== 'height') {
-      const nextWidth = Math.max(132, Math.min(360, photoLibraryDrag.width + e.clientX - photoLibraryDrag.startX));
+      const maxWidth = uiState.layoutMode === 'tablet' ? Math.max(168, Math.min(360, window.innerWidth - 188)) : 360;
+      const nextWidth = Math.max(132, Math.min(maxWidth, photoLibraryDrag.width + e.clientX - photoLibraryDrag.startX));
       uiState.photoLibraryWidth = nextWidth;
     }
     if (photoLibraryDrag.mode === 'both' || photoLibraryDrag.mode === 'height') {
       const pageBottom = pageFrame.getBoundingClientRect().bottom;
-      const maxHeight = Math.max(170, Math.min(window.innerHeight - photoLibraryDrag.top - 18, pageBottom - photoLibraryDrag.top));
+      const viewportLimit = window.innerHeight - photoLibraryDrag.top - 18;
+      const pageLimit = uiState.layoutMode === 'tablet' ? viewportLimit : pageBottom - photoLibraryDrag.top;
+      const maxHeight = Math.max(170, Math.min(viewportLimit, pageLimit));
       uiState.photoLibraryHeight = Math.max(150, Math.min(maxHeight, photoLibraryDrag.height + e.clientY - photoLibraryDrag.startY));
     }
     applyPhotoLibraryState();
@@ -5280,8 +5250,8 @@ function addPhotoToPage(page, photo, dropXFrac, dropYFrac) {
   const y = Math.max(-hFrac * 0.5, Math.min(1 - hFrac * 0.5, dropYFrac - hFrac / 2));
   const initial = { x, y, w: wFrac, h: hFrac, rotation: 0 };
   const crop = { scale: 1, offsetX: 0, offsetY: 0 };
-  const selectedFrame = photoFrameSelect.value || '';
-  const selectedShadow = photoShadowSelect.value || 'none';
+  const selectedFrame = manualPhotoFrameDefault || '';
+  const selectedShadow = manualPhotoShadowDefault || 'none';
   page.objects.push({
     id: 'obj' + (nextObjId++),
     photoId: photo._id,
@@ -5931,7 +5901,6 @@ function renderPage() {
   pageEdgeNextBtn.disabled = nextBtn.disabled;
   pageLockBtn.textContent = page.locked ? t('unlockPage') : t('lockPage');
   delPageBtn.disabled = page.type !== 'content';
-  footnoteInput.value = page.footnote || '';
   if (pageNumberInput) {
     pageNumberInput.value = page.pageNumber || '';
     pageNumberInput.disabled = page.type !== 'content';
@@ -6983,19 +6952,6 @@ function createStaticPageElement(page, className = '') {
     }
     frame.appendChild(div);
   });
-
-  if (page.footnote) {
-    const foot = document.createElement('div');
-    foot.style.position = 'absolute';
-    foot.style.left = '8%';
-    foot.style.right = '8%';
-    foot.style.bottom = '4%';
-    foot.style.font = '12px var(--serif)';
-    foot.style.color = '#6e6658';
-    foot.style.textAlign = 'center';
-    foot.textContent = page.footnote;
-    frame.appendChild(foot);
-  }
   renderDrawings(frame, page, false);
   renderPageNumber(frame, page, false);
   appendStudioLogo(frame, page);
@@ -7178,14 +7134,6 @@ function createBlankStaticPage(className = '') {
             stPageFlipTargetPage = e.data;
             requestAnimationFrame(() => requestAnimationFrame(refreshStPageFlipPhotos));
             syncStPageFlipButtons();
-            if (e.data === 0 || e.data === book.pages.length - 1) {
-            setTimeout(() => {
-              if (stPageFlip && stPageFlipState === 'read') {
-                stPageFlip.turnToPage(e.data);
-                syncStPageFlipButtons();
-              }
-            }, 80);
-          }
         });
           const pages = createStPageFlipPages();
           stPageFlip.loadFromHTML(pages);
@@ -7344,6 +7292,10 @@ autoFlipIntervalInput.addEventListener('change', () => {
   function turnBookPreview(direction) {
     if (stPageFlip && preview3d.classList.contains('active')) {
       if (stPageFlipState !== 'read') return;
+      const current = stPageFlip.getCurrentPageIndex();
+      const count = stPageFlip.getPageCount();
+      if (direction > 0 && current >= count - 1) return;
+      if (direction < 0 && current <= 0) return;
       if (direction > 0) stPageFlip.flipNext('top');
       else stPageFlip.flipPrev('top');
       setTimeout(syncStPageFlipButtons, 40);
@@ -7433,6 +7385,7 @@ function applyDynamicPrintSettings() {
 }
 
 async function outputPrintFile() {
+  applyPhotoLibraryState();
   const format = printFormatSelect.value;
   const warning = evenPageWarning();
   const lightWarning = lightProjectPrintWarning();
@@ -7480,20 +7433,27 @@ function downloadUrl(url, filename) {
 }
 
 function offerExportDownload(url, filename, message) {
+  const oldLink = document.getElementById('pngDownloadLink');
+  if (oldLink) oldLink.remove();
   if (uiState.layoutMode !== 'tablet') {
     downloadUrl(url, filename);
     hint.textContent = message;
     return;
   }
+  const tabletMessage = lang() === 'en'
+    ? 'PNG is ready. Tap Save PNG to open or save it.'
+    : 'PNG 已准备好。请点击“保存 PNG”打开或保存。';
+  const actions = document.querySelector('.page-actions') || hint;
   const link = document.createElement('a');
+  link.id = 'pngDownloadLink';
   link.href = url;
   link.download = filename;
-  link.textContent = lang() === 'en' ? 'Open / save PNG' : '打开 / 保存 PNG';
+  link.textContent = lang() === 'en' ? 'Save PNG' : '保存 PNG';
   link.className = 'file-button';
-  link.style.marginLeft = '8px';
-  hint.textContent = '';
-  hint.appendChild(document.createTextNode(message + ' '));
-  hint.appendChild(link);
+  link.style.display = 'inline-flex';
+  link.style.alignItems = 'center';
+  actions.appendChild(link);
+  hint.textContent = tabletMessage;
 }
 
   function drawImageCover(ctx, img, x, y, w, h) {
@@ -7713,12 +7673,6 @@ function offerExportDownload(url, filename, message) {
         await drawCanvasPhoto(ctx, obj, sourceWidth, sourceHeight);
       }
       [...page.textBoxes].sort((a, b) => (a.zIndex || 20) - (b.zIndex || 20)).forEach(text => drawCanvasText(ctx, text, sourceWidth, sourceHeight));
-      if (page.footnote) {
-        ctx.font = '12px Georgia, serif';
-        ctx.fillStyle = '#6e6658';
-        ctx.textAlign = 'center';
-        ctx.fillText(page.footnote, sourceWidth / 2, sourceHeight * .955);
-      }
       if (page.type === 'content' && page.pageNumber) {
         ctx.font = '10px Georgia, serif';
         ctx.fillStyle = '#3f382f';
