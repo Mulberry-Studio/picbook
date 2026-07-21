@@ -46,7 +46,9 @@
     display: flex; align-items: flex-start; gap: 4px;
     width: min(1040px, calc(100vw - 48px)); max-width: min(1040px, calc(100vw - 48px));
   }
-  .brand-logo { display: block; flex: 0 0 52px; width: 52px; height: 68px; object-fit: contain; background: transparent; filter: brightness(1.16) saturate(.78) contrast(.9); opacity: .9; box-shadow: none; }
+  .brand-logo { display: block; flex: 0 0 52px; width: 52px; height: 68px; object-fit: contain; background: transparent; filter: brightness(1.16) saturate(.78) contrast(.9); opacity: .9; box-shadow: none; cursor: pointer; border-radius: 10px; }
+  .brand-logo:focus-visible { outline: 2px solid #7d2b73; outline-offset: 3px; }
+  .brand-logo.tablet-active { filter: brightness(1.28) saturate(.96) contrast(.92) drop-shadow(0 0 10px rgba(125,43,115,.30)); opacity: 1; }
   .brand-copy { min-width: 0; flex: 1 1 auto; }
   .eyebrow { font-family: var(--mono); font-size: 10.5px; letter-spacing: .12em; color: var(--text); opacity: .82; text-shadow: 0 1px 0 var(--readable-text-shadow); text-transform: uppercase; margin-bottom: 2px; }
   .title-row { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
@@ -1143,6 +1145,195 @@
   }
   .export-pages { display: none; }
 
+  html[data-layout-mode="tablet"] {
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  html[data-layout-mode="tablet"] body {
+    padding: 16px max(14px, env(safe-area-inset-left)) calc(92px + env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-right));
+    overflow-x: hidden;
+  }
+  html[data-layout-mode="tablet"] body > .brand-row,
+  html[data-layout-mode="tablet"] body > .book-area,
+  html[data-layout-mode="tablet"] body > .preview-3d {
+    width: 100%;
+    max-width: 100%;
+  }
+  html[data-layout-mode="tablet"] .brand-row {
+    position: sticky;
+    top: 0;
+    z-index: 2100;
+    align-items: center;
+    padding: 8px 10px;
+    border: 1px solid rgba(155,126,91,.24);
+    border-radius: 14px;
+    background: rgba(255,250,241,.70);
+    box-shadow: 0 12px 26px rgba(91,62,35,.10);
+    backdrop-filter: blur(10px);
+  }
+  html[data-layout-mode="tablet"] .brand-logo {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 58px;
+  }
+  html[data-layout-mode="tablet"] .eyebrow { font-size: 10px; }
+  html[data-layout-mode="tablet"] .title-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    padding-bottom: 2px;
+  }
+  html[data-layout-mode="tablet"] .title-row h1 {
+    flex: 0 0 auto;
+    min-width: 0;
+  }
+  html[data-layout-mode="tablet"] h1.image-title .title-art { height: 34px; max-width: 250px; }
+  html[data-layout-mode="tablet"] h1.text-title span { font-size: 29px; line-height: 36px; }
+  html[data-layout-mode="tablet"] .title-row select,
+  html[data-layout-mode="tablet"] .title-row input[type=color],
+  html[data-layout-mode="tablet"] .title-row .dropzone,
+  html[data-layout-mode="tablet"] .title-row .help-popover summary,
+  html[data-layout-mode="tablet"] .title-row .ai-assistant-popover summary,
+  html[data-layout-mode="tablet"] .compact-toolbar button,
+  html[data-layout-mode="tablet"] .compact-toolbar select,
+  html[data-layout-mode="tablet"] .compact-toolbar summary,
+  html[data-layout-mode="tablet"] .page-nav button {
+    min-height: 46px;
+  }
+  html[data-layout-mode="tablet"] .title-row .dropzone,
+  html[data-layout-mode="tablet"] .title-row .help-popover summary {
+    width: 104px;
+    flex-basis: 104px;
+  }
+  html[data-layout-mode="tablet"] .title-row input[type=color] {
+    width: 48px;
+    flex-basis: 48px;
+  }
+  html[data-layout-mode="tablet"] .title-row .ai-assistant-popover,
+  html[data-layout-mode="tablet"] .title-row .ai-assistant-popover summary {
+    width: 46px;
+    flex-basis: 46px;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar {
+    position: sticky;
+    top: 82px;
+    z-index: 2050;
+    width: max-content;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 8px;
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .page-size-field,
+  html[data-layout-mode="tablet"] .compact-toolbar .reset-popover,
+  html[data-layout-mode="tablet"] .compact-toolbar .background-popover {
+    order: 8;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .photo-shadow-field,
+  html[data-layout-mode="tablet"] .compact-toolbar .photo-frame-field {
+    flex-basis: 88px;
+    min-width: 88px;
+  }
+  html[data-layout-mode="tablet"] .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(168px, var(--photo-library-width, 224px));
+    gap: 10px;
+    align-items: start;
+  }
+  html[data-layout-mode="tablet"] .page-column {
+    position: relative;
+  }
+  html[data-layout-mode="tablet"] .page-nav {
+    position: absolute;
+    top: 10px;
+    right: 34px;
+    z-index: 1200;
+    display: flex;
+    flex-wrap: nowrap;
+    max-width: calc(100vw - var(--photo-library-width, 224px) - 92px);
+    padding: 7px;
+    border-radius: 14px;
+    background: rgba(255,250,241,.74);
+    border: 1px solid rgba(155,126,91,.28);
+    box-shadow: 0 12px 24px rgba(91,62,35,.10);
+    backdrop-filter: blur(8px);
+    overflow-x: auto;
+    margin: 0;
+  }
+  html[data-layout-mode="tablet"] .page-nav .page-type-badge,
+  html[data-layout-mode="tablet"] .page-nav .page-jump,
+  html[data-layout-mode="tablet"] .page-nav > span {
+    display: none;
+  }
+  html[data-layout-mode="tablet"] .page-wrap {
+    padding: 22px 14px;
+  }
+  html[data-layout-mode="tablet"] .page-edge-turn {
+    min-width: 52px;
+  }
+  html[data-layout-mode="tablet"] .page-turn-edge {
+    width: 54px;
+    height: 72px;
+  }
+  html[data-layout-mode="tablet"] .page-meta {
+    max-width: 720px;
+    margin: -76px 34px 10px;
+    position: relative;
+    z-index: 1100;
+    pointer-events: auto;
+  }
+  html[data-layout-mode="tablet"] .page-meta-label {
+    font-size: 14px;
+  }
+  html[data-layout-mode="tablet"] .page-meta textarea {
+    min-height: 54px;
+    font-size: 16px;
+    background: rgba(255,250,241,.78);
+    backdrop-filter: blur(7px);
+  }
+  html[data-layout-mode="tablet"] .photo-library {
+    min-width: 168px;
+    max-width: 42vw;
+    touch-action: none;
+  }
+  html[data-layout-mode="tablet"] .tray-item {
+    width: 68px;
+    height: 68px;
+  }
+  html[data-layout-mode="tablet"] .tray-item .remove-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 18px;
+  }
+  html[data-layout-mode="tablet"] .slot-controls button {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 14px;
+  }
+  html[data-layout-mode="tablet"] .resize-handle,
+  html[data-layout-mode="tablet"] .rotate-handle {
+    width: 20px;
+    height: 20px;
+    border-width: 3px;
+  }
+  html[data-layout-mode="tablet"] .resize-handle::before,
+  html[data-layout-mode="tablet"] .rotate-handle::before,
+  html[data-layout-mode="tablet"] .photo-library-resize::before,
+  html[data-layout-mode="tablet"] .photo-library-resize-y::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+  }
+  html[data-layout-mode="tablet"] .pobj,
+  html[data-layout-mode="tablet"] .text-box {
+    touch-action: none;
+  }
+  html[data-layout-mode="tablet"] .preview-3d.fullscreen .st-pageflip-book {
+    width: min(98vw, 1540px);
+    height: min(94vh, 1040px);
+  }
+
   @media print {
     @page { margin: 0; }
     body { background: #fff; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1497,7 +1688,7 @@
 <body>
 
   <div class="brand-row">
-    <img class="brand-logo" src="assets/mulberry-header-logo.png" alt="" aria-hidden="true">
+    <img class="brand-logo" id="layoutModeToggle" src="assets/mulberry-header-logo.png" alt="切换版式" role="button" tabindex="0" aria-pressed="false">
     <div class="brand-copy">
       <div class="eyebrow"><span>Mulberry Design Studio</span></div>
       <div class="title-row">
@@ -1928,6 +2119,8 @@ const STUDIO_LOGO_MARGIN_IN = 0.25;
 const I18N = {
   zh: {
     title: '图画书编辑器',
+    layoutModeDesktop: '当前：PC 版。点击切换到平板版。',
+    layoutModeTablet: '当前：平板版。点击切换到 PC 版。',
     webBgTitle: '页面背景色',
     choosePhotos: '导入照片',
     projectFile: '文件',
@@ -2025,6 +2218,8 @@ const I18N = {
   },
   en: {
     title: 'Picbook Editor',
+    layoutModeDesktop: 'Current: desktop layout. Click to switch to tablet layout.',
+    layoutModeTablet: 'Current: tablet layout. Click to switch to desktop layout.',
     webBgTitle: 'Workspace background color',
     choosePhotos: 'Import Photos',
     projectFile: 'File',
@@ -2124,6 +2319,7 @@ const I18N = {
 
 // ---- DOM 引用 ----
 const languageSelect = document.getElementById('languageSelect');
+const layoutModeToggle = document.getElementById('layoutModeToggle');
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 const projectFilePopover = document.getElementById('projectFilePopover');
@@ -2259,7 +2455,7 @@ let autoBackgroundMaps = [];
 let currentAutoBackgroundMaps = [];
 let pendingAutoLayoutAfterMapImport = false;
 let preferImportedAutoBackgroundMaps = false;
-const DEFAULT_UI_STATE = { language: 'zh', photoLibraryX: 0, photoLibraryY: 0, photoLibraryWidth: 224, photoLibraryHeight: null, brushType: 'hard', brushColor: '#2d2922', brushSize: 4, drawMode: 'handwriting', layoutTemplate: 'feature', autoLayoutScope: 'current', autoLayoutMode: 'time', autoLayoutMax: 5, autoLayoutRandomFrame: 'yes', autoLayoutRandomBg: 'yes', autoLayoutRandomText: 'yes', qualityFilter: false };
+const DEFAULT_UI_STATE = { language: 'zh', layoutMode: 'desktop', photoLibraryX: 0, photoLibraryY: 0, photoLibraryWidth: 224, photoLibraryHeight: null, brushType: 'hard', brushColor: '#2d2922', brushSize: 4, drawMode: 'handwriting', layoutTemplate: 'feature', autoLayoutScope: 'current', autoLayoutMode: 'time', autoLayoutMax: 5, autoLayoutRandomFrame: 'yes', autoLayoutRandomBg: 'yes', autoLayoutRandomText: 'yes', qualityFilter: false };
 let uiState = { ...DEFAULT_UI_STATE };
 let storageSaveTimer = null;
 let storageWarningShown = false;
@@ -2646,7 +2842,7 @@ function applyLanguage() {
     <p><b>File</b>: Full Save embeds photos and is larger but self-contained. Light Save stores compressed previews and is smaller; keep the original photo folder and verify quality before final print export.</p>
     <p><b>3D Preview</b>: preview the closed book, page turns, auto flip, timed interval, and fullscreen mode. Click Fullscreen again or press Esc to exit.</p>
     <p><b>Export</b>: choose PDF, PDF/X-1a, PDF/X-4, or Single Page PNG. Empty-page hints and unedited template sample text are never printed/exported.</p>
-    <p><b>Memory</b>: the browser remembers workspace background, page backgrounds, library photos, book pages, and imported assets for the next session.</p>` : `
+    <p><b>Memory</b>: the browser remembers lightweight preferences such as language, layout mode, workspace color, page size, and library panel position. Use File > Save File for book pages, photos, text, and imported assets.</p>` : `
     <p><b>快速开始</b>：导入照片，把备选照片库里的照片拖到当前页面，然后移动、缩放、裁切、旋转、加边框、加页注，并用实体书预览检查效果。</p>
     <p><b>照片库</b>：导入照片后会进入右侧备选照片库；拖入书页或自动排版使用后会从图库移除。页面照片可用“回库”放回图库，方便在不同页面之间重新调整。</p>
     <p><b>照片控制</b>：选中页面照片后，可拖动照片框移动位置，拖右下圆点改变照片框大小，拖顶部圆点旋转。照片内悬浮工具可用方向箭头微调取景，+/- 缩放照片内容，重置恢复取景，回库放回备选库，垃圾桶删除，换框按钮轮换边框。</p>
@@ -2662,8 +2858,52 @@ function applyLanguage() {
     <p><b>文件</b>：完整保存会把照片嵌入项目文件，文件较大但更可靠；轻量保存会压缩照片预览，文件较小，但最终输出印刷文件前应保留原照片文件夹并核对清晰度。</p>
     <p><b>实体书预览</b>：可查看合起、翻开、自动翻页和定时间隔；全屏按钮可进入沉浸预览，再点一次或按 Esc 可退出全屏。</p>
     <p><b>输出</b>：可选择 PDF、PDF/X-1a、PDF/X-4 或单页 PNG；系统按当前开本输出，空白页提示和未编辑的文字模板示例不会进入印刷文件。</p>
-    <p><b>记忆</b>：浏览器会自动记住工作台背景、页面背景、照片库、书页内容和导入素材，下次打开继续上次状态。</p>`;
+    <p><b>记忆</b>：浏览器只自动记住语言、版式模式、工作台颜色、开本、照片库位置等轻量偏好；书页、照片、文字和导入素材请用“文件 > 保存文件”保存。</p>`;
+  applyLayoutMode();
   if (book) renderPage();
+}
+
+function applyLayoutMode() {
+  const mode = uiState.layoutMode === 'tablet' ? 'tablet' : 'desktop';
+  document.documentElement.dataset.layoutMode = mode;
+  if (!layoutModeToggle) return;
+  const title = mode === 'tablet' ? t('layoutModeTablet') : t('layoutModeDesktop');
+  layoutModeToggle.classList.toggle('tablet-active', mode === 'tablet');
+  layoutModeToggle.title = title;
+  layoutModeToggle.alt = title;
+  layoutModeToggle.setAttribute('aria-label', title);
+  layoutModeToggle.setAttribute('aria-pressed', mode === 'tablet' ? 'true' : 'false');
+}
+
+function isNonMousePointer(e) {
+  return e && e.type && e.type.startsWith('pointer') && e.pointerType !== 'mouse';
+}
+
+function addTouchStart(el, handler) {
+  el.addEventListener('pointerdown', (e) => {
+    if (!isNonMousePointer(e)) return;
+    try { el.setPointerCapture(e.pointerId); } catch (err) {}
+    handler(e);
+  });
+}
+
+function addMoveEndListeners(moveHandler, endHandler, usePointer = false) {
+  if (usePointer) {
+    window.addEventListener('pointermove', moveHandler);
+    window.addEventListener('pointerup', endHandler);
+    window.addEventListener('pointercancel', endHandler);
+  } else {
+    window.addEventListener('mousemove', moveHandler);
+    window.addEventListener('mouseup', endHandler);
+  }
+}
+
+function removeMoveEndListeners(moveHandler, endHandler) {
+  window.removeEventListener('mousemove', moveHandler);
+  window.removeEventListener('mouseup', endHandler);
+  window.removeEventListener('pointermove', moveHandler);
+  window.removeEventListener('pointerup', endHandler);
+  window.removeEventListener('pointercancel', endHandler);
 }
 const LAYOUT_TEMPLATES = {
   feature: [
@@ -3679,6 +3919,21 @@ languageSelect.addEventListener('change', () => {
   persistAppState();
 });
 
+function toggleLayoutMode() {
+  uiState.layoutMode = uiState.layoutMode === 'tablet' ? 'desktop' : 'tablet';
+  applyLayoutMode();
+  syncPhotoLibraryHeight();
+  renderPage();
+  persistAppState();
+}
+
+layoutModeToggle.addEventListener('click', toggleLayoutMode);
+layoutModeToggle.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  e.preventDefault();
+  toggleLayoutMode();
+});
+
 aiAssistantAskBtn.addEventListener('click', () => askAiAssistant());
 aiAssistantInput.addEventListener('keydown', (e) => {
   if (e.key !== 'Enter') return;
@@ -3922,6 +4177,12 @@ function renderTray() {
     item.addEventListener('dragstart', (e) => {
       e.dataTransfer.setData('text/plain', p._id);
       e.dataTransfer.effectAllowed = 'copy';
+    });
+    item.addEventListener('click', (e) => {
+      if (e.target.closest('.remove-btn') || uiState.layoutMode !== 'tablet') return;
+      addPhotoToPage(book.pages[currentPageIdx], p, 0.5, 0.5);
+      renderPage();
+      updateJsonView();
     });
     const img = document.createElement('img');
     img.src = p.url;
@@ -4867,16 +5128,15 @@ document.querySelectorAll('.toolbar-popover').forEach(detail => {
 });
 
 let photoLibraryDrag = null;
-photoLibraryTitle.addEventListener('mousedown', (e) => {
+function startPhotoLibraryMove(e) {
   e.preventDefault();
   const style = getComputedStyle(photoLibrary);
   const currentX = parseFloat(style.getPropertyValue('--photo-library-x')) || 0;
   const currentY = parseFloat(style.getPropertyValue('--photo-library-y')) || 0;
   photoLibraryDrag = { type: 'move', startX: e.clientX, startY: e.clientY, currentX, currentY };
-  window.addEventListener('mousemove', onPhotoLibraryDrag);
-  window.addEventListener('mouseup', endPhotoLibraryDrag);
-});
-photoLibraryResize.addEventListener('mousedown', (e) => {
+  addMoveEndListeners(onPhotoLibraryDrag, endPhotoLibraryDrag, isNonMousePointer(e));
+}
+function startPhotoLibraryResize(e) {
   e.preventDefault();
   e.stopPropagation();
   const rect = photoLibrary.getBoundingClientRect();
@@ -4884,17 +5144,21 @@ photoLibraryResize.addEventListener('mousedown', (e) => {
   const height = rect.height;
   const mode = e.clientY >= rect.bottom - 32 ? 'both' : 'width';
   photoLibraryDrag = { type: 'resize', mode, startX: e.clientX, startY: e.clientY, width, height, top: rect.top };
-  window.addEventListener('mousemove', onPhotoLibraryDrag);
-  window.addEventListener('mouseup', endPhotoLibraryDrag);
-});
-photoLibraryResizeY.addEventListener('mousedown', (e) => {
+  addMoveEndListeners(onPhotoLibraryDrag, endPhotoLibraryDrag, isNonMousePointer(e));
+}
+function startPhotoLibraryHeightResize(e) {
   e.preventDefault();
   e.stopPropagation();
   const rect = photoLibrary.getBoundingClientRect();
   photoLibraryDrag = { type: 'resize', mode: 'height', startX: e.clientX, startY: e.clientY, width: rect.width, height: rect.height, top: rect.top };
-  window.addEventListener('mousemove', onPhotoLibraryDrag);
-  window.addEventListener('mouseup', endPhotoLibraryDrag);
-});
+  addMoveEndListeners(onPhotoLibraryDrag, endPhotoLibraryDrag, isNonMousePointer(e));
+}
+photoLibraryTitle.addEventListener('mousedown', startPhotoLibraryMove);
+photoLibraryResize.addEventListener('mousedown', startPhotoLibraryResize);
+photoLibraryResizeY.addEventListener('mousedown', startPhotoLibraryHeightResize);
+addTouchStart(photoLibraryTitle, startPhotoLibraryMove);
+addTouchStart(photoLibraryResize, startPhotoLibraryResize);
+addTouchStart(photoLibraryResizeY, startPhotoLibraryHeightResize);
 
 function onPhotoLibraryDrag(e) {
   if (!photoLibraryDrag) return;
@@ -4925,8 +5189,7 @@ function onPhotoLibraryDrag(e) {
 
 function endPhotoLibraryDrag() {
   photoLibraryDrag = null;
-  window.removeEventListener('mousemove', onPhotoLibraryDrag);
-  window.removeEventListener('mouseup', endPhotoLibraryDrag);
+  removeMoveEndListeners(onPhotoLibraryDrag, endPhotoLibraryDrag);
   persistAppState();
 }
 
@@ -5858,6 +6121,11 @@ function renderObject(page, obj) {
       selectPhotoObject(obj);
       renderPage();
     });
+    addTouchStart(div, (e) => {
+      e.stopPropagation();
+      selectPhotoObject(obj);
+      renderPage();
+    });
     pageFrame.appendChild(div);
     return;
   }
@@ -5886,6 +6154,7 @@ function renderObject(page, obj) {
   `;
   controls.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mousedown', e => e.stopPropagation());
+    btn.addEventListener('pointerdown', e => e.stopPropagation());
     btn.addEventListener('click', e => {
       e.stopPropagation();
       if (btn.dataset.act === 'delete') { removeObjectFromPage(page, obj.id); return; }
@@ -5934,6 +6203,12 @@ function renderObject(page, obj) {
   });
   resizeHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startResize(e, div, page, obj); });
   rotateHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startRotate(e, div, page, obj, angleReadout); });
+  addTouchStart(div, (e) => {
+    selectPhotoObject(obj);
+    startMove(e, div, page, obj);
+  });
+  addTouchStart(resizeHandle, (e) => { e.stopPropagation(); startResize(e, div, page, obj); });
+  addTouchStart(rotateHandle, (e) => { e.stopPropagation(); startRotate(e, div, page, obj, angleReadout); });
 
   pageFrame.appendChild(div);
 
@@ -6063,6 +6338,7 @@ function renderTextBox(page, text) {
   editor.spellcheck = false;
   editor.innerHTML = text.html || escapeHtml(text.text || '');
   editor.addEventListener('mousedown', e => e.stopPropagation());
+  editor.addEventListener('pointerdown', e => e.stopPropagation());
   editor.addEventListener('input', () => {
     syncTextFromEditor(text, editor);
     updateJsonView();
@@ -6083,6 +6359,7 @@ function renderTextBox(page, text) {
   `;
   controls.querySelectorAll('button').forEach(btn => {
     btn.addEventListener('mousedown', e => e.stopPropagation());
+    btn.addEventListener('pointerdown', e => e.stopPropagation());
     btn.addEventListener('click', e => {
       e.stopPropagation();
       if (btn.dataset.act === 'delete') {
@@ -6116,6 +6393,8 @@ function renderTextBox(page, text) {
   div.addEventListener('mousedown', (e) => startTextMove(e, div, page, text));
   resizeHandle.addEventListener('mousedown', (e) => { e.stopPropagation(); startTextResize(e, div, page, text); });
   div.addEventListener('click', (e) => { e.stopPropagation(); selectTextBox(text); });
+  addTouchStart(div, (e) => startTextMove(e, div, page, text));
+  addTouchStart(resizeHandle, (e) => { e.stopPropagation(); startTextResize(e, div, page, text); });
   pageFrame.appendChild(div);
 }
 
@@ -6146,8 +6425,7 @@ function startTextMove(e, div, page, text) {
     startX: text.x, startY: text.y,
     pageW: pageRect.width, pageH: pageRect.height,
   };
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  addMoveEndListeners(onDragMove, onDragEnd, isNonMousePointer(e));
 }
 
 function startTextResize(e, div, page, text) {
@@ -6161,8 +6439,7 @@ function startTextResize(e, div, page, text) {
     startW: text.w, startH: text.h || 0.12,
     pageW: pageRect.width, pageH: pageRect.height,
   };
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  addMoveEndListeners(onDragMove, onDragEnd, isNonMousePointer(e));
 }
 
 function applyPageBackground(el, bg) {
@@ -6396,8 +6673,7 @@ function startMove(e, div, page, obj) {
     startX: obj.x, startY: obj.y,
     pageW: pageRect.width, pageH: pageRect.height,
   };
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  addMoveEndListeners(onDragMove, onDragEnd, isNonMousePointer(e));
 }
 
 function startResize(e, div, page, obj) {
@@ -6411,8 +6687,7 @@ function startResize(e, div, page, obj) {
     rotationRad: obj.rotation * Math.PI / 180,
     pageW: pageRect.width, pageH: pageRect.height,
   };
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  addMoveEndListeners(onDragMove, onDragEnd, isNonMousePointer(e));
 }
 
 const ROTATE_SNAP_DEG = 6; // 离 0/90/180/270 差多少度以内就吸附上去，方便回到水平/垂直
@@ -6429,8 +6704,7 @@ function startRotate(e, div, page, obj, angleReadout) {
     type: 'rotate', div, obj,
     centerX, centerY, startAngle, startRotation: obj.rotation, angleReadout,
   };
-  window.addEventListener('mousemove', onDragMove);
-  window.addEventListener('mouseup', onDragEnd);
+  addMoveEndListeners(onDragMove, onDragEnd, isNonMousePointer(e));
 }
 
 function normalizeAngle(deg) {
@@ -6508,8 +6782,7 @@ function onDragMove(e) {
 
 function onDragEnd() {
   if (!dragState) return;
-  window.removeEventListener('mousemove', onDragMove);
-  window.removeEventListener('mouseup', onDragEnd);
+  removeMoveEndListeners(onDragMove, onDragEnd);
   if (dragState.angleReadout) dragState.angleReadout.style.display = 'none';
   dragState = null;
   renderPage();
