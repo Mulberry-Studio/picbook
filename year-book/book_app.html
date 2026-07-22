@@ -17,13 +17,14 @@
     --button-glass-top: #fffdf5e8; --button-glass-mid: #f8efdfcc; --button-glass-bottom: #ddcbb0b8;
     --button-glass-border: #96795788; --button-glass-shadow: #5b3e2345; --button-glass-text: #2f2923;
     --button-text-shadow: rgba(255,255,255,.58);
+    --ui-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
     --mono: 'SF Mono', 'Consolas', 'Menlo', monospace;
     --serif: 'Iowan Old Style', 'Songti SC', Georgia, 'Noto Serif SC', serif;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0; color: var(--text); text-shadow: 0 1px 0 var(--readable-text-shadow);
-    font-family: -apple-system,'Segoe UI','PingFang SC',sans-serif;
+    font-family: var(--ui-sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     padding: 34px 34px 72px;
     background:
       radial-gradient(circle at 10% 8%, rgba(255,255,255,.62), transparent 28%),
@@ -138,6 +139,7 @@
     font-size: 12px; line-height: 1.15; white-space: normal;
   }
   .reset-popover .popover-body { min-width: 230px; }
+  .reset-popover .popover-body.inline-tools { grid-template-columns: minmax(0, 1fr); }
   .about-popover .popover-body { min-width: 420px; line-height: 1.55; font-size: 12.5px; }
   .about-popover .popover-body p { margin: 0 0 8px; }
   .print-file-popover {
@@ -166,7 +168,7 @@
     min-height: 40px;
   }
   .about-popover .popover-body p:last-child { margin-bottom: 0; }
-  .reset-actions { display: flex; gap: 8px; grid-column: span 2; }
+  .reset-actions { display: flex; gap: 8px; grid-column: 1 / -1; }
   .reset-actions button { flex: 1 1 0; }
   .toolbar-popover { position: relative; flex: 0 0 auto; }
   .toolbar-popover summary {
@@ -330,6 +332,7 @@
   }
 
   .workspace-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(132px, var(--photo-library-width, 224px)); gap: 14px; align-items: start; }
+  .photo-library-shell { display: contents; }
   .photo-library {
     position: relative; align-self: start; border: 1px solid rgba(155,126,91,.26); border-radius: 10px;
     padding: 10px; background: rgba(255,250,241,.58); transform: translate(var(--photo-library-x, 0px), var(--photo-library-y, 0px));
@@ -362,7 +365,7 @@
   }
   .library-tools summary::-webkit-details-marker { display: none; }
   .library-tools .field { gap: 3px; }
-  .photo-library .field label { font-family: -apple-system,'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif; font-weight: 520; font-size: 12px; letter-spacing: 0; }
+  .photo-library .field label { font-family: var(--ui-sans); font-weight: 520; font-size: 12px; letter-spacing: 0; }
   .library-row { display: grid; grid-template-columns: minmax(0, 1fr) 72px; gap: 7px; align-items: end; }
   .library-row.equal { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .library-row.triple { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -372,7 +375,7 @@
   .auto-layout-popover select,
   .auto-layout-popover button { width: 100%; min-height: 32px; font-size: 11.5px; padding: 5px 8px; }
   .auto-layout-popover .field { gap: 3px; }
-  .auto-layout-popover .field label { font-family: -apple-system,'Segoe UI','Microsoft YaHei','PingFang SC',sans-serif; font-weight: 520; font-size: 12px; letter-spacing: 0; }
+  .auto-layout-popover .field label { font-family: var(--ui-sans); font-weight: 520; font-size: 12px; letter-spacing: 0; }
   .auto-layout-popover .check-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--field-text); text-shadow: none; }
   .photo-library-resize {
     position: absolute; top: 0; right: 0; bottom: 0; z-index: 30;
@@ -834,13 +837,13 @@
   .pobj.selected .slot-controls { opacity: 1; }
   .text-box:hover .slot-controls, .text-box.selected .slot-controls { opacity: 1; }
   .slot-controls button {
-      width: 24px; height: 24px; border: none; border-radius: 6px; cursor: pointer;
-      background: rgba(255,255,255,.12); color: #fff; font-size: 13px; line-height: 1;
+      width: 28px; height: 28px; border: none; border-radius: 7px; cursor: pointer;
+      background: rgba(255,255,255,.16); color: #fff; font-size: 15px; line-height: 1;
     display: flex; align-items: center; justify-content: center; padding: 0;
   }
-    .slot-controls button[data-act=toc] { width: 42px; font-size: 12px; }
+    .slot-controls button[data-act=toc] { width: 46px; font-size: 12px; }
     .slot-controls button.toc-active { color: #d69bff; background: rgba(125,43,115,.42); }
-    .slot-controls button[data-act=restore] { width: 44px; font-size: 12px; }
+    .slot-controls button[data-act=restore] { width: 50px; font-size: 12px; }
     .slot-controls button:hover { background: rgba(255,255,255,.28); }
     .slot-controls button:disabled { opacity: .3; cursor: default; }
     .slot-controls button:disabled:hover { background: rgba(255,255,255,.12); }
@@ -915,7 +918,9 @@
       background-size: var(--st-photo-bg-size, cover);
     }
     .st-pageflip-page .pobj-crop img {
-      opacity: 0;
+      /* iOS can defer the background fallback during a page turn. Keep the
+         decoded image visible so the turning page does not become gray. */
+      opacity: 1;
     }
   .book-3d {
     position: relative; width: min(700px, 86vw); aspect-ratio: 1.42 / 1;
@@ -1831,8 +1836,8 @@
     max-height: calc(100dvh - 180px);
     transform: none;
     overscroll-behavior: contain;
-    touch-action: none;
-    cursor: move;
+    touch-action: pan-y;
+    cursor: auto;
   }
 
   html[data-layout-mode="tablet"] .page-nav .toolbar-popover .popover-body {
@@ -1939,6 +1944,271 @@
   html[data-layout-mode="tablet"] .pobj.selected,
   html[data-layout-mode="tablet"] .text-box.selected {
     touch-action: none;
+  }
+
+  /* Tablet mode keeps editing compact, but preserves deliberate finger targets. */
+  html[data-layout-mode="tablet"] .page-nav .auto-layout-popover .auto-layout-body {
+    min-width: 0;
+    gap: 6px;
+  }
+  html[data-layout-mode="tablet"] .page-nav .auto-layout-popover .field { gap: 2px; }
+  html[data-layout-mode="tablet"] .page-nav .auto-layout-popover .field label {
+    font-size: 10.5px;
+    line-height: 1.1;
+  }
+  html[data-layout-mode="tablet"] .page-nav .auto-layout-popover select,
+  html[data-layout-mode="tablet"] .page-nav .auto-layout-popover button {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding: 5px 7px;
+    font-size: 11.5px;
+  }
+  html[data-layout-mode="tablet"] .toolbar-popover summary,
+  html[data-layout-mode="tablet"] .ai-assistant-popover summary {
+    touch-action: manipulation;
+  }
+  html[data-layout-mode="tablet"] .photo-library-shell {
+    display: grid;
+    grid-template-rows: 42px minmax(0, 1fr) 42px;
+    height: var(--photo-library-shell-height, 360px);
+    min-width: 168px;
+    max-width: min(42vw, calc(100vw - 188px));
+    margin-top: var(--photo-library-align-offset, 0px);
+    align-self: start;
+  }
+  html[data-layout-mode="tablet"] .photo-library {
+    position: relative;
+    top: auto;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin: 0;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    scrollbar-gutter: stable;
+  }
+  html[data-layout-mode="tablet"] .photo-library-resize,
+  html[data-layout-mode="tablet"] .photo-library-resize-y { display: none; }
+  .library-scroll-button { display: none; }
+  html[data-layout-mode="tablet"] .library-scroll-button {
+    position: static;
+    justify-self: center;
+    align-self: center;
+    display: block;
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    min-height: 42px;
+    border: 0;
+    border-radius: 0;
+    transform: rotate(90deg);
+    background-color: transparent;
+    background-size: 34px 34px;
+    box-shadow: none;
+  }
+  html[data-layout-mode="tablet"] .library-scroll-button.up { transform: rotate(90deg); }
+  html[data-layout-mode="tablet"] .library-scroll-button.down { transform: rotate(-90deg); }
+  html[data-layout-mode="tablet"] .page-nav.popover-active { z-index: 2800; }
+  html[data-layout-mode="tablet"] .compact-toolbar:has(.toolbar-popover[open]) { z-index: 3800; }
+  html[data-layout-mode="tablet"] .brand-row { position: relative; }
+  html[data-layout-mode="tablet"] .brand-row.popover-active,
+  html[data-layout-mode="tablet"] .compact-toolbar.popover-active { z-index: 5000; }
+  html[data-layout-mode="tablet"] .compact-toolbar.popover-active {
+    overflow: visible !important;
+    backdrop-filter: none;
+  }
+  /* Final tablet override: page-nav's large finger-target rule must not leak
+     into the compact Auto Layout settings grid. */
+  html[data-layout-mode="tablet"] #autoLayoutPopover .auto-layout-body {
+    width: min(288px, calc(100vw - 28px)) !important;
+    min-width: 0 !important;
+    grid-auto-rows: min-content !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover .library-row {
+    min-height: 0 !important;
+    align-items: end !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover .field {
+    min-height: 0 !important;
+    height: auto !important;
+    flex: 0 0 auto !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover select,
+  html[data-layout-mode="tablet"] #autoLayoutPopover button {
+    display: block !important;
+    block-size: 36px !important;
+    min-block-size: 36px !important;
+    max-block-size: 36px !important;
+    height: 36px !important;
+    min-height: 36px !important;
+    max-height: 36px !important;
+    flex: 0 0 36px !important;
+    line-height: 1.1 !important;
+  }
+  html[data-layout-mode="tablet"] .page-nav { z-index: 3600; }
+  html[data-layout-mode="tablet"] .brand-row.popover-active .toolbar-popover[open] .popover-body,
+  html[data-layout-mode="tablet"] .compact-toolbar.popover-active .toolbar-popover[open] .popover-body,
+  html[data-layout-mode="tablet"] .page-nav .toolbar-popover[open] .popover-body,
+  html[data-layout-mode="tablet"] .compact-toolbar .toolbar-popover[open] .popover-body,
+  html[data-layout-mode="tablet"] .ai-assistant-popover[open] .ai-assistant-body {
+    position: fixed !important;
+    z-index: 3700 !important;
+    overflow: auto !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar.popover-active .toolbar-popover[open] .popover-body {
+    position: absolute !important;
+    top: calc(100% + 8px) !important;
+    left: 0 !important;
+    right: auto !important;
+    max-height: min(70dvh, 560px) !important;
+  }
+  html[data-layout-mode="tablet"] .slot-controls { padding: 6px; gap: 5px; }
+  html[data-layout-mode="tablet"] .slot-controls button {
+    min-width: 32px;
+    min-height: 32px;
+    font-size: 16px;
+  }
+  html[data-layout-mode="tablet"] .book-stage.pageflip-mode,
+  html[data-layout-mode="tablet"] .st-pageflip-book {
+    touch-action: pan-y;
+    overscroll-behavior: auto;
+  }
+  html[data-layout-mode="tablet"] .toolbar-popover .popover-body,
+  html[data-layout-mode="tablet"] .ai-assistant-body {
+    padding: 8px;
+    border-radius: 9px;
+  }
+  html[data-layout-mode="tablet"] .toolbar-popover .popover-body.inline-tools { gap: 7px; }
+  html[data-layout-mode="tablet"] .reset-popover .popover-body.inline-tools {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  html[data-layout-mode="tablet"] .toolbar-popover .popover-body .field { gap: 2px; }
+  html[data-layout-mode="tablet"] .toolbar-popover .popover-body .field label {
+    font-size: 10.5px;
+    line-height: 1.15;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body button,
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body select,
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body input[type=number],
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body input[type=text],
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .file-button {
+    min-height: 36px !important;
+    height: 36px !important;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  /* Keep tablet popover contents on the same desktop grids. The viewport may
+     constrain the floating panel, but it must not invent a second mobile form. */
+  html[data-layout-mode="tablet"] .compact-toolbar .toolbar-popover .popover-body {
+    width: min(300px, calc(100vw - 20px)) !important;
+    max-width: min(300px, calc(100vw - 20px)) !important;
+    padding: 12px !important;
+    border-radius: 10px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .toolbar-popover .popover-body.inline-tools {
+    grid-template-columns: repeat(3, minmax(82px, 1fr)) !important;
+    gap: 10px !important;
+    align-items: end !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .field {
+    gap: 4px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .field label {
+    font-size: 11.5px !important;
+    line-height: normal !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body button,
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body select,
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body input[type=number],
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body input[type=text],
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .file-button {
+    min-height: 40px !important;
+    height: 40px !important;
+    padding-top: 7px !important;
+    padding-bottom: 7px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .wide-control,
+  html[data-layout-mode="tablet"] .compact-toolbar .popover-body .range-field {
+    grid-column: span 2 !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .text-popover .popover-body.inline-tools {
+    grid-template-columns: minmax(112px, 1fr) 64px 88px !important;
+    gap: 9px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .text-popover .font-size-field {
+    max-width: 60px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .text-popover .contrast-field {
+    grid-column: 1 / -1 !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .text-popover .template-field {
+    grid-column: 1 / span 2 !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .text-popover .template-button {
+    min-width: 84px !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .reset-popover .popover-body.inline-tools {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  html[data-layout-mode="tablet"] .compact-toolbar .reset-popover .popover-body {
+    width: min(230px, calc(100vw - 20px)) !important;
+    max-width: min(230px, calc(100vw - 20px)) !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover .auto-layout-body {
+    gap: 8px !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover .field {
+    gap: 3px !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover .field label {
+    font-size: 12px !important;
+    line-height: normal !important;
+  }
+  html[data-layout-mode="tablet"] #autoLayoutPopover select,
+  html[data-layout-mode="tablet"] #autoLayoutPopover button {
+    block-size: 32px !important;
+    min-block-size: 32px !important;
+    max-block-size: 32px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+    flex-basis: 32px !important;
+    padding: 5px 8px !important;
+  }
+
+  /* One readable control face: match the File / Open Print Settings buttons
+     instead of letting individual panels inherit pale or mono variants. */
+  button.primary,
+  button.ghost,
+  button.icon,
+  #preview3dBtn,
+  .file-button,
+  .dropzone,
+  .toolbar-popover summary,
+  .library-tools summary,
+  .page-type-badge,
+  .compact-toolbar select,
+  .print-file-popover summary {
+    font-family: var(--ui-sans) !important;
+    font-weight: 700 !important;
+    color: var(--button-glass-text) !important;
+    text-shadow: 0 1px 0 var(--button-text-shadow) !important;
+  }
+  html[lang="en"] .title-row .title-dropzone .dropzone-label b {
+    font-weight: 700 !important;
+  }
+  .page-nav .page-type-badge,
+  .page-nav > button,
+  .page-nav .toolbar-popover > summary {
+    font-family: var(--ui-sans) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: var(--button-glass-text) !important;
+    text-shadow: 0 1px 0 var(--button-text-shadow) !important;
   }
 </style>
 </head>
@@ -2317,12 +2587,16 @@
           <button class="ghost" id="preview3dBtn">实体书 3D 预览</button>
         </div>
       </div>
-      <div class="photo-library">
-        <div class="photo-library-title">备选照片库</div>
-        <div class="tray" id="tray"></div>
-        <div class="tray-hint" id="trayHint" style="display:none;">把照片拖到左边页面上</div>
-        <div class="photo-library-resize-y" title="拖动调整照片库高度"></div>
-        <div class="photo-library-resize" title="拖动调整照片库宽度"></div>
+      <div class="photo-library-shell" id="photoLibraryShell">
+        <button class="page-turn-edge library-scroll-button up" id="libraryScrollUpBtn" type="button" title="向上浏览照片" aria-label="向上浏览照片"></button>
+        <div class="photo-library">
+          <div class="photo-library-title">备选照片库</div>
+          <div class="tray" id="tray"></div>
+          <div class="tray-hint" id="trayHint" style="display:none;">把照片拖到左边页面上</div>
+          <div class="photo-library-resize-y" title="拖动调整照片库高度"></div>
+          <div class="photo-library-resize" title="拖动调整照片库宽度"></div>
+        </div>
+        <button class="page-turn-edge library-scroll-button down" id="libraryScrollDownBtn" type="button" title="向下浏览照片" aria-label="向下浏览照片"></button>
       </div>
     </div>
   </div>
@@ -2642,9 +2916,12 @@ const photoShadowSelect = document.getElementById('photoShadowSelect');
 const photoFrameSelect = document.getElementById('photoFrameSelect');
 const applyPhotoFrameBtn = document.getElementById('applyPhotoFrameBtn');
 const photoLibrary = document.querySelector('.photo-library');
+const photoLibraryShell = document.getElementById('photoLibraryShell');
 const photoLibraryTitle = document.querySelector('.photo-library-title');
 const photoLibraryResize = document.querySelector('.photo-library-resize');
 const photoLibraryResizeY = document.querySelector('.photo-library-resize-y');
+const libraryScrollUpBtn = document.getElementById('libraryScrollUpBtn');
+const libraryScrollDownBtn = document.getElementById('libraryScrollDownBtn');
 const layoutTemplateSelect = document.getElementById('layoutTemplateSelect');
 const autoLayoutScopeSelect = document.getElementById('autoLayoutScopeSelect');
 const autoLayoutModeSelect = document.getElementById('autoLayoutModeSelect');
@@ -2695,6 +2972,8 @@ let previewTurning = false;
 let bookPreviewClosed = true;
 let bookClosedPageIdx = 0;
 let autoFlipTimer = null;
+let autoFlipDirection = 1;
+let previewInitialRenderTimer = null;
 let stPageFlip = null;
 let stPageFlipState = 'read';
 let stPageFlipTargetPage = 0;
@@ -2765,12 +3044,37 @@ function setOptionText(select, map) {
   });
 }
 
+function replaceSelectOptionText(select, map) {
+  if (!select) return;
+  const selectedValue = select.value;
+  Array.from(select.options).forEach(option => {
+    if (!Object.prototype.hasOwnProperty.call(map, option.value)) return;
+    const replacement = new Option(map[option.value], option.value, option.defaultSelected, option.value === selectedValue);
+    replacement.disabled = option.disabled;
+    option.replaceWith(replacement);
+  });
+  select.value = selectedValue;
+}
+
+function refreshNativeSelectLabel(select) {
+  if (!select) return;
+  const selectedValue = select.value;
+  const selectedIndex = Array.from(select.options).findIndex(option => option.value === selectedValue);
+  // Safari can keep the old selected option label after its text changes until
+  // the control is focused. Clear and restore the selection without emitting
+  // input/change, so no photo setting is accidentally applied.
+  select.selectedIndex = -1;
+  void select.offsetWidth;
+  select.value = selectedValue;
+  if (selectedIndex >= 0) select.selectedIndex = selectedIndex;
+}
+
 function syncPhotoEffectSelectLabels(expanded = false) {
   if (lang() !== 'en') {
-    setOptionText(photoShadowSelect, expanded
+    replaceSelectOptionText(photoShadowSelect, expanded
       ? { none: '无阴影', soft: '柔和', paper: '纸感', deep: '立体' }
       : { none: '阴影', soft: '柔和', paper: '纸感', deep: '立体' });
-    setOptionText(photoFrameSelect, expanded ? {
+    replaceSelectOptionText(photoFrameSelect, expanded ? {
       '': '无边框', classic: '经典白边', film: '胶片', washi: '和纸', watercolor: '水彩', torn: '撕纸', ink: '墨线',
       polaroid: '拍立得', postage: '邮票齿边', doubleline: '双线画框', 'rounded-card': '圆角卡片', 'corner-tabs': '角贴纸',
       'shadow-mat': '厚纸卡框', scallop: '圆齿花边', 'floral-corners': '花角', linen: '亚麻卡纸', gallery: '画廊窄框',
@@ -2787,12 +3091,14 @@ function syncPhotoEffectSelectLabels(expanded = false) {
       'ornate-gold': '金框', 'watercolor-bloom': '水彩花', 'blob-mask': '异形', 'circle-mask': '圆形',
       pip: '画中画', 'diagonal-sash': '斜切',
     });
+    refreshNativeSelectLabel(photoShadowSelect);
+    refreshNativeSelectLabel(photoFrameSelect);
     return;
   }
-  setOptionText(photoShadowSelect, expanded
+  replaceSelectOptionText(photoShadowSelect, expanded
     ? { none: 'No Shadow', soft: 'Soft', paper: 'Paper', deep: 'Deep' }
     : { none: 'Shadow', soft: 'Soft', paper: 'Paper', deep: 'Deep' });
-  setOptionText(photoFrameSelect, expanded ? {
+  replaceSelectOptionText(photoFrameSelect, expanded ? {
     '': 'No Frame', classic: 'Classic White', film: 'Film', washi: 'Washi Tape', watercolor: 'Watercolor', torn: 'Torn Paper', ink: 'Ink Line',
     polaroid: 'Polaroid', postage: 'Postage', doubleline: 'Double Line', 'rounded-card': 'Rounded Card', 'corner-tabs': 'Corner Tabs',
     'shadow-mat': 'Mat Board', scallop: 'Scallop', 'floral-corners': 'Floral Corners', linen: 'Linen', gallery: 'Gallery',
@@ -2809,6 +3115,8 @@ function syncPhotoEffectSelectLabels(expanded = false) {
     'ornate-gold': 'Gold', 'watercolor-bloom': 'Bloom', 'blob-mask': 'Mask', 'circle-mask': 'Circle',
     pip: 'PIP', 'diagonal-sash': 'Sash',
   });
+  refreshNativeSelectLabel(photoShadowSelect);
+  refreshNativeSelectLabel(photoFrameSelect);
 }
 
 function setFieldLabel(controlId, text) {
@@ -3122,6 +3430,7 @@ function applyLayoutMode() {
   const mode = uiState.layoutMode === 'tablet' ? 'tablet' : 'desktop';
   document.documentElement.dataset.layoutMode = mode;
   arrangeLayoutModeControls(mode);
+  enforceTabletAutoLayoutSizing();
   updateTabletToolbarMetrics();
   if (!layoutModeToggle) return;
   const title = mode === 'tablet' ? t('layoutModeTablet') : t('layoutModeDesktop');
@@ -3138,6 +3447,25 @@ function applyLayoutMode() {
 
 function isTabletLayout() {
   return uiState.layoutMode === 'tablet';
+}
+
+function enforceTabletAutoLayoutSizing() {
+  const body = document.querySelector('#autoLayoutPopover .auto-layout-body');
+  if (!body) return;
+  const fields = body.querySelectorAll('select, button');
+  if (!isTabletLayout()) {
+    fields.forEach(el => ['height', 'min-height', 'max-height', 'block-size', 'min-block-size', 'max-block-size', 'flex'].forEach(prop => el.style.removeProperty(prop)));
+    return;
+  }
+  fields.forEach(el => {
+    el.style.setProperty('height', '32px', 'important');
+    el.style.setProperty('min-height', '32px', 'important');
+    el.style.setProperty('max-height', '32px', 'important');
+    el.style.setProperty('block-size', '32px', 'important');
+    el.style.setProperty('min-block-size', '32px', 'important');
+    el.style.setProperty('max-block-size', '32px', 'important');
+    el.style.setProperty('flex', '0 0 32px', 'important');
+  });
 }
 
 function updateTabletToolbarMetrics() {
@@ -3202,65 +3530,7 @@ function closeFloatingPopovers(except = null) {
   });
 }
 
-let floatingPopoverDrag = null;
 let suppressPopoverClickUntil = 0;
-
-function startFloatingPopoverDrag(e) {
-  if (!isTabletLayout()) return;
-  if (e.target.closest('button, input, select, textarea, label, a')) return;
-  const body = e.currentTarget;
-  const rect = body.getBoundingClientRect();
-  floatingPopoverDrag = {
-    body,
-    startX: e.clientX,
-    startY: e.clientY,
-    left: rect.left,
-    top: rect.top,
-    moved: false,
-  };
-  e.preventDefault();
-  e.stopPropagation();
-  try { body.setPointerCapture(e.pointerId); } catch (err) {}
-  window.addEventListener('pointermove', onFloatingPopoverDrag);
-  window.addEventListener('pointerup', endFloatingPopoverDrag);
-  window.addEventListener('pointercancel', endFloatingPopoverDrag);
-}
-
-function onFloatingPopoverDrag(e) {
-  if (!floatingPopoverDrag) return;
-  const { body, startX, startY, left, top } = floatingPopoverDrag;
-  const dx = e.clientX - startX;
-  const dy = e.clientY - startY;
-  if (!floatingPopoverDrag.moved && Math.hypot(dx, dy) < 5) return;
-  floatingPopoverDrag.moved = true;
-  const rect = body.getBoundingClientRect();
-  const nextLeft = Math.max(8, Math.min(window.innerWidth - rect.width - 8, left + dx));
-  const nextTop = Math.max(8, Math.min(window.innerHeight - Math.min(rect.height, window.innerHeight - 16) - 8, top + dy));
-  body.style.left = nextLeft + 'px';
-  body.style.top = nextTop + 'px';
-  body.style.right = 'auto';
-  e.preventDefault();
-  e.stopPropagation();
-}
-
-function endFloatingPopoverDrag(e) {
-  const draggedBody = floatingPopoverDrag && floatingPopoverDrag.body;
-  if (floatingPopoverDrag && floatingPopoverDrag.moved) {
-    draggedBody.dataset.dragJustEnded = '1';
-    suppressPopoverClickUntil = Date.now() + 350;
-    setTimeout(() => {
-      if (draggedBody) draggedBody.dataset.dragJustEnded = '';
-    }, 0);
-  }
-  floatingPopoverDrag = null;
-  window.removeEventListener('pointermove', onFloatingPopoverDrag);
-  window.removeEventListener('pointerup', endFloatingPopoverDrag);
-  window.removeEventListener('pointercancel', endFloatingPopoverDrag);
-  if (e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-}
 
 function isNonMousePointer(e) {
   return e && e.type && e.type.startsWith('pointer') && e.pointerType !== 'mouse';
@@ -3909,12 +4179,19 @@ function applyPhotoLibraryState() {
   photoLibrary.style.setProperty('--photo-library-x', (uiState.photoLibraryX || 0) + 'px');
   photoLibrary.style.setProperty('--photo-library-y', (uiState.photoLibraryY || 0) + 'px');
   document.querySelector('.workspace-grid').style.setProperty('--photo-library-width', (uiState.photoLibraryWidth || 224) + 'px');
-  if (uiState.photoLibraryHeight) {
+  if (tabletMode) {
+    // The library is a locked companion to the page in tablet mode. Its own
+    // scrollbar, and the two arrow buttons, handle long photo collections.
+    const pageHeight = pageFrame ? Math.round(pageFrame.getBoundingClientRect().height) : 0;
+    const fittedHeight = Math.max(250, pageHeight || Math.round(window.innerHeight * 0.56));
+    uiState.photoLibraryHeight = fittedHeight;
+    photoLibraryShell?.style.setProperty('--photo-library-shell-height', fittedHeight + 'px');
+    photoLibrary.style.setProperty('--photo-library-height', fittedHeight + 'px');
+    photoLibrary.style.setProperty('--photo-library-max-height', fittedHeight + 'px');
+  } else if (uiState.photoLibraryHeight) {
     const rect = photoLibrary.getBoundingClientRect();
-    const maxHeight = tabletMode
-      ? Math.max(210, Math.min(window.innerHeight * 0.62, window.innerHeight - 118))
-      : Math.max(170, window.innerHeight - rect.top - 18);
-    uiState.photoLibraryHeight = Math.max(tabletMode ? 190 : 150, Math.min(maxHeight, uiState.photoLibraryHeight));
+    const maxHeight = Math.max(170, window.innerHeight - rect.top - 18);
+    uiState.photoLibraryHeight = Math.max(150, Math.min(maxHeight, uiState.photoLibraryHeight));
     photoLibrary.style.setProperty('--photo-library-height', uiState.photoLibraryHeight + 'px');
     photoLibrary.style.setProperty('--photo-library-max-height', uiState.photoLibraryHeight + 'px');
   } else {
@@ -3956,12 +4233,20 @@ function getSelectedFrameTarget(page) {
 
 function syncPhotoLibraryHeight() {
   if (!photoLibrary || !pageFrame) return;
-  if (uiState.photoLibraryHeight) return;
+  if (uiState.photoLibraryHeight && uiState.layoutMode !== 'tablet') return;
   requestAnimationFrame(() => {
     photoLibrary.style.removeProperty('--photo-library-height');
     photoLibrary.style.removeProperty('--photo-library-max-height');
     if (uiState.layoutMode === 'tablet') {
-      const fittedHeight = Math.round(Math.max(210, Math.min(window.innerHeight * 0.42, 430, window.innerHeight - 140)));
+      const pageHeight = Math.round(pageFrame.getBoundingClientRect().height);
+      const fittedHeight = Math.max(250, pageHeight || Math.round(window.innerHeight * 0.56));
+      // Reset before measuring: this prevents a previous page's offset from
+      // accumulating when the current page has a different aspect ratio.
+      if (photoLibraryShell) photoLibraryShell.style.setProperty('--photo-library-align-offset', '0px');
+      const pageTop = pageFrame.getBoundingClientRect().top;
+      const shellTop = photoLibraryShell ? photoLibraryShell.getBoundingClientRect().top : photoLibrary.getBoundingClientRect().top;
+      if (photoLibraryShell) photoLibraryShell.style.setProperty('--photo-library-align-offset', Math.max(0, Math.round(pageTop - shellTop)) + 'px');
+      photoLibraryShell?.style.setProperty('--photo-library-shell-height', fittedHeight + 'px');
       photoLibrary.style.setProperty('--photo-library-height', fittedHeight + 'px');
       photoLibrary.style.setProperty('--photo-library-max-height', fittedHeight + 'px');
       return;
@@ -4169,6 +4454,8 @@ function imageDataUrlToCompressed(dataUrl, maxSide = 1200, quality = .72) {
 
 async function makeProjectPayload(mode = 'full') {
   const state = JSON.parse(makePersistPayload());
+  state.projectFormat = 'mulberry-picturebook-project';
+  state.projectVersion = 2;
   state.projectSaveMode = mode;
   state.savedAt = new Date().toISOString();
   if (state.book) state.book.projectSaveMode = mode;
@@ -4208,11 +4495,23 @@ async function makeProjectPayload(mode = 'full') {
   return JSON.stringify(state, null, 2);
 }
 
+function validateProjectState(state) {
+  if (!state || !state.book || !Array.isArray(state.book.pages)) return false;
+  return state.book.pages.every(page => (page.objects || []).every(obj => {
+    if (!obj || !obj.photoId) return true;
+    const libraryPhoto = (state.photos || []).find(photo => photo && photo._id === obj.photoId);
+    return Boolean((libraryPhoto && libraryPhoto.url) || (obj.photoSnapshot && obj.photoSnapshot.url));
+  }));
+}
+
 async function saveProjectFile(mode = 'full') {
   hint.textContent = mode === 'light'
     ? (lang() === 'en' ? 'Preparing a light project file...' : '正在生成轻量项目文件...')
     : '';
   const payload = await makeProjectPayload(mode);
+  if (!validateProjectState(JSON.parse(payload))) {
+    throw new Error('project payload validation failed');
+  }
   const blob = new Blob([payload], { type: 'application/json;charset=utf-8' });
   const filename = projectFilename();
   if (window.showSaveFilePicker) {
@@ -4262,8 +4561,9 @@ async function openProjectFile(file) {
     : '打开这个项目文件？当前编辑器状态会被替换。');
   if (!ok) return;
   try {
-    const state = JSON.parse(await file.text());
-    if (!applyPersistedState(state)) throw new Error('invalid project file');
+    const source = await file.text();
+    const state = JSON.parse(source);
+    if (!validateProjectState(state) || !applyPersistedState(state)) throw new Error('invalid project file');
     undoStack = [];
     redoStack = [];
     lastBookSnapshot = serializeBookState();
@@ -4280,8 +4580,8 @@ async function openProjectFile(file) {
     hint.textContent = lang() === 'en' ? 'Opened the project file.' : '已打开项目文件。';
   } catch (err) {
     hint.textContent = lang() === 'en'
-      ? 'Could not open this project file. Please choose a valid .picturebook.json file.'
-      : '无法打开这个项目文件；请选择有效的 .picturebook.json 文件。';
+      ? 'Could not open this project file. It may be incomplete or not a valid .picturebook.json project.'
+      : '无法打开这个项目文件；文件可能不完整，或不是有效的 .picturebook.json 项目文件。';
   }
 }
 
@@ -4290,6 +4590,10 @@ saveProjectBtn.addEventListener('click', async () => {
   saveProjectBtn.disabled = true;
   try {
     await saveProjectFile(projectSaveModeSelect.value || 'full');
+  } catch (err) {
+    hint.textContent = lang() === 'en'
+      ? 'The project file could not be prepared. Please try saving again.'
+      : '项目文件未能生成，请稍后重试保存。';
   } finally {
     saveProjectBtn.disabled = false;
   }
@@ -5476,10 +5780,28 @@ keepOutsideBtn.addEventListener('click', () => {
   updateJsonView();
 });
 
+function renderPreviewAfterReveal() {
+  if (previewInitialRenderTimer) clearTimeout(previewInitialRenderTimer);
+  const renderAfterLayout = () => {
+    if (!preview3d.classList.contains('active')) return;
+    // Force the newly revealed preview to take part in layout before PageFlip
+    // measures it. This avoids a blank first preview that only appears after
+    // the next browser scroll/paint.
+    void preview3d.offsetHeight;
+    void bookStage.offsetHeight;
+    resetStPageFlipPreview();
+    renderBookPreview();
+  };
+  requestAnimationFrame(() => requestAnimationFrame(renderAfterLayout));
+  previewInitialRenderTimer = setTimeout(renderAfterLayout, 320);
+}
+
 preview3dBtn.addEventListener('click', () => {
   const shouldOpen = isTabletLayout() ? true : !preview3d.classList.contains('active');
   preview3d.classList.toggle('active', shouldOpen);
   if (!preview3d.classList.contains('active')) {
+    if (previewInitialRenderTimer) clearTimeout(previewInitialRenderTimer);
+    previewInitialRenderTimer = null;
     stopAutoFlip();
     if (bookStage) bookStage.classList.remove('pageflip-mode');
     preview3d.classList.remove('fullscreen');
@@ -5492,8 +5814,7 @@ preview3dBtn.addEventListener('click', () => {
   bookPreviewClosed = preview3d.classList.contains('active');
   bookClosedPageIdx = currentPageIdx >= book.pages.length - 1 ? book.pages.length - 1 : 0;
   stPageFlipTargetPage = bookClosedPageIdx;
-  resetStPageFlipPreview();
-  renderBookPreview();
+  renderPreviewAfterReveal();
   if (isTabletLayout()) preview3d.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 bookPrevBtn.addEventListener('click', () => turnBookPreview(-1));
@@ -5549,21 +5870,38 @@ document.addEventListener('click', (e) => {
 
 document.querySelectorAll('.toolbar-popover, .ai-assistant-popover').forEach(detail => {
   detail.addEventListener('toggle', () => {
-    if (!detail.open) return;
+    const nav = detail.closest('.page-nav');
+    const host = detail.closest('.brand-row, .compact-toolbar, .page-nav');
+    if (!detail.open) {
+      nav?.classList.remove('popover-active');
+      if (host && !host.querySelector('.toolbar-popover[open], .ai-assistant-popover[open]')) host.classList.remove('popover-active');
+      return;
+    }
     document.querySelectorAll('.toolbar-popover[open], .ai-assistant-popover[open]').forEach(other => {
       if (other !== detail) other.open = false;
     });
+    nav?.classList.add('popover-active');
+    host?.classList.add('popover-active');
     const body = detail.querySelector('.popover-body, .ai-assistant-body');
     if (body) {
       body.style.left = '';
       body.style.top = '';
       body.style.right = '';
+      if (isTabletLayout() && !detail.closest('.compact-toolbar')) {
+        requestAnimationFrame(() => {
+          if (!detail.open) return;
+          const trigger = detail.querySelector('summary');
+          const triggerRect = trigger.getBoundingClientRect();
+          const bodyRect = body.getBoundingClientRect();
+          const left = Math.max(8, Math.min(window.innerWidth - bodyRect.width - 8, triggerRect.left));
+          const top = Math.max(8, Math.min(window.innerHeight - Math.min(bodyRect.height, window.innerHeight - 16) - 8, triggerRect.bottom + 8));
+          body.style.left = left + 'px';
+          body.style.top = top + 'px';
+          body.style.right = 'auto';
+        });
+      }
     }
   });
-});
-
-document.querySelectorAll('.popover-body, .ai-assistant-body').forEach(body => {
-  body.addEventListener('pointerdown', startFloatingPopoverDrag);
 });
 
 let photoLibraryDrag = null;
@@ -5598,6 +5936,23 @@ photoLibraryResizeY.addEventListener('mousedown', startPhotoLibraryHeightResize)
 addTouchStart(photoLibraryTitle, startPhotoLibraryMove);
 addTouchStart(photoLibraryResize, startPhotoLibraryResize);
 addTouchStart(photoLibraryResizeY, startPhotoLibraryHeightResize);
+
+function scrollPhotoLibrary(direction) {
+  if (!photoLibrary) return;
+  const distance = Math.max(120, Math.round(photoLibrary.clientHeight * .72));
+  photoLibrary.scrollBy({ top: direction * distance, behavior: 'smooth' });
+}
+
+libraryScrollUpBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  scrollPhotoLibrary(-1);
+});
+libraryScrollDownBtn?.addEventListener('click', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  scrollPhotoLibrary(1);
+});
 
 function onPhotoLibraryDrag(e) {
   if (!photoLibraryDrag) return;
@@ -7701,6 +8056,7 @@ function startAutoFlip() {
   if (!preview3d.classList.contains('active')) preview3d.classList.add('active');
   renderBookPreview();
   stopAutoFlip();
+  autoFlipDirection = 1;
   autoFlipBtn.textContent = t('stopFlip');
   const tick = () => {
     if (!preview3d.classList.contains('active')) { stopAutoFlip(); return; }
@@ -7709,13 +8065,19 @@ function startAutoFlip() {
         if (autoFlipTimer) autoFlipTimer = setTimeout(tick, 180);
         return;
       }
-      if (stPageFlip.getCurrentPageIndex() >= stPageFlip.getPageCount() - 1) { stopAutoFlip(); return; }
-      stPageFlip.flipNext('top');
-      if (autoFlipTimer) autoFlipTimer = setTimeout(tick, Math.max(autoFlipDelayMs(), 1250));
+      const current = stPageFlip.getCurrentPageIndex();
+      const last = stPageFlip.getPageCount() - 1;
+      if (last <= 0) { stopAutoFlip(); return; }
+      if (current >= last) autoFlipDirection = -1;
+      if (current <= 0) autoFlipDirection = 1;
+      if (autoFlipDirection > 0) stPageFlip.flipNext('top');
+      else stPageFlip.flipPrev('top');
+      if (autoFlipTimer) autoFlipTimer = setTimeout(tick, Math.max(autoFlipDelayMs(), 1400));
       return;
     }
-    if (bookPreviewClosed && bookClosedPageIdx === book.pages.length - 1) { stopAutoFlip(); return; }
-    if (!previewTurning) turnBookPreview(1);
+    if (bookPreviewClosed && bookClosedPageIdx === book.pages.length - 1) autoFlipDirection = -1;
+    if (bookPreviewClosed && bookClosedPageIdx === 0) autoFlipDirection = 1;
+    if (!previewTurning) turnBookPreview(autoFlipDirection);
     if (autoFlipTimer) autoFlipTimer = setTimeout(tick, Math.max(autoFlipDelayMs(), 1450));
   };
   autoFlipTimer = setTimeout(tick, 80);
@@ -8223,10 +8585,20 @@ window.addEventListener('resize', () => {
   resizeTimer = setTimeout(() => {
     updateTabletToolbarMetrics();
     if (book) renderPage();
+    if (preview3d.classList.contains('active')) {
+      resetStPageFlipPreview();
+      renderBookPreview();
+    }
   }, 150);
 });
 window.addEventListener('orientationchange', () => {
-  setTimeout(updateTabletToolbarMetrics, 160);
+  setTimeout(() => {
+    updateTabletToolbarMetrics();
+    if (preview3d.classList.contains('active')) {
+      resetStPageFlipPreview();
+      renderBookPreview();
+    }
+  }, 220);
 });
 window.addEventListener('scroll', () => {
   if (!isTabletLayout()) return;
