@@ -2210,6 +2210,30 @@
     color: var(--button-glass-text) !important;
     text-shadow: 0 1px 0 var(--button-text-shadow) !important;
   }
+  /* Keep the tablet library inside the viewport and visually paired with the page. */
+  html[data-layout-mode="tablet"] .workspace-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(148px, min(28vw, 192px)) !important;
+    gap: 6px !important;
+    width: 100%;
+  }
+  html[data-layout-mode="tablet"] .photo-library-shell {
+    min-width: 148px !important;
+    max-width: min(28vw, 192px) !important;
+    justify-self: start;
+  }
+  /* A user-selected PC layout must remain desktop-like on a narrow iPad viewport. */
+  @media (max-width: 760px) {
+    html[data-layout-mode="desktop"] .compact-toolbar .toolbar-popover .popover-body {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: auto;
+      width: auto;
+      min-width: 270px;
+      max-width: min(620px, calc(100vw - 28px));
+      max-height: min(70dvh, 560px);
+    }
+  }
 </style>
 </head>
 <body>
@@ -2566,7 +2590,7 @@
           <details class="toolbar-popover about-popover" id="aboutPopover">
             <summary id="aboutSummary">关于</summary>
             <div class="popover-body">
-              <p id="aboutVersionText">版本：Rev0.1，仅 PC 端。</p>
+              <p id="aboutVersionText">版本：Rev 0.2，Windows PC 和 iPad；其他平台尚未测试。</p>
               <p id="aboutLocalText">本工具是一个单文件、纯静态的本地图画书编辑工具。当前版本主要由一个 book_app.html 文件运行，不依赖服务器后端、数据库或云端处理服务。</p>
               <p id="aboutPrivacyText">用户导入的照片、字体、背景图、项目文件等内容均在浏览器本地处理。工具不会主动上传、传输、收集或保存用户文件到任何服务器，也不包含用户账号系统或远程隐私数据分析功能。</p>
               <p id="aboutStorageText">本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器本地存储、下载文件、打印导出等行为由用户本机浏览器完成。如需重新编辑项目或留存项目，请自行妥善保存项目文件、原始照片、字体文件和导出的印刷文件。</p>
@@ -2702,7 +2726,7 @@ const I18N = {
     delPage: '- 页面',
     tocPage: '目录页',
     about: '关于',
-    aboutVersionText: '版本：Rev0.1，仅 PC 端。',
+    aboutVersionText: '版本：Rev 0.2，Windows PC 和 iPad；其他平台尚未测试。',
     aboutLocalText: '本工具是一个单文件、纯静态的本地图画书编辑工具。当前版本主要由一个 book_app.html 文件运行，不依赖服务器后端、数据库或云端处理服务。',
     aboutPrivacyText: '用户导入的照片、字体、背景图、项目文件等内容均在浏览器本地处理。工具不会主动上传、传输、收集或保存用户文件到任何服务器，也不包含用户账号系统或远程隐私数据分析功能。',
     aboutStorageText: '本页面作为静态网页运行；用户在页面中导入的文件只会被当前浏览器读取和处理。浏览器自动记忆仅保存轻量偏好设置；书本页面、照片、文字等项目内容请通过“文件 > 保存文件”保存。除封面、封底等少量重点页面外，不建议大量使用“导入背景用图片”作为页面背景：一是可能占用浏览器内存并导致变慢，二是可能明显增加印刷文件体积和印刷成本。',
@@ -2800,7 +2824,7 @@ const I18N = {
     delPage: '- Page',
     tocPage: 'TOC Page',
     about: 'About',
-    aboutVersionText: 'Version: Rev0.1, PC only.',
+    aboutVersionText: 'Version: Rev 0.2, Windows PC and iPad. Other platforms are untested.',
     aboutLocalText: 'This tool is a single-file, fully static, local picturebook editor. The current version mainly runs from one book_app.html file and does not depend on a server backend, database, or cloud processing service.',
     aboutPrivacyText: 'Photos, fonts, background images, project files, and other user-imported content are processed locally in the browser. The tool does not actively upload, transmit, collect, or save user files to any server, and it does not include user accounts or remote privacy-data analytics.',
     aboutStorageText: 'This page runs as a static webpage. Files imported into the page are read and processed only by the current browser. Automatic browser memory saves only lightweight preferences; save book pages, photos, text, and other project content through File > Save File. Except for a few key pages such as the cover and back cover, avoid heavy use of imported background images as page backgrounds: they may use browser memory and slow the editor, and they may noticeably increase print-file size and printing cost.',
@@ -5868,7 +5892,21 @@ document.addEventListener('click', (e) => {
   clearObjectSelection();
 });
 
+function preparePopoverHost(detail) {
+  const host = detail && detail.closest('.brand-row, .compact-toolbar, .page-nav');
+  if (host) host.classList.add('popover-active');
+}
+
 document.querySelectorAll('.toolbar-popover, .ai-assistant-popover').forEach(detail => {
+  const summary = detail.querySelector('summary');
+  if (summary) {
+    // Add the clipping/positioning escape hatch before the browser opens the
+    // <details>, rather than one paint later in its toggle handler.
+    summary.addEventListener('pointerdown', () => preparePopoverHost(detail), { capture: true });
+    summary.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') preparePopoverHost(detail);
+    }, { capture: true });
+  }
   detail.addEventListener('toggle', () => {
     const nav = detail.closest('.page-nav');
     const host = detail.closest('.brand-row, .compact-toolbar, .page-nav');
