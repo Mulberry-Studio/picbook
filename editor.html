@@ -221,6 +221,25 @@
     color: var(--field-text);
     font-weight: 750;
   }
+  html[lang="en"] .background-popover .field label {
+    font-size: 10.5px;
+    line-height: 1.12;
+    min-height: 24px;
+  }
+  html[lang="en"] .background-popover select {
+    font-size: 10.5px;
+    padding-left: 7px;
+    padding-right: 22px;
+  }
+  html[lang="en"] .background-popover #randomBgBtn,
+  html[lang="en"] .background-popover #applyBgRangeBtn {
+    min-height: 42px;
+    padding: 5px 6px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    font-size: 10px;
+    line-height: 1.12;
+  }
   .help-body { display: block; width: min(520px, 88vw); line-height: 1.55; font-size: 12.5px; }
   .help-body p { margin: 0 0 8px; }
   .help-body p:last-child { margin-bottom: 0; }
@@ -1354,7 +1373,11 @@
     min-width: 0;
     max-width: none;
     max-height: calc(100vh - 132px);
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
     z-index: 3200;
   }
   html[data-layout-mode="tablet"] .page-nav .toolbar-popover .popover-body,
@@ -2222,6 +2245,25 @@
     justify-self: start;
     margin-left: -20px !important;
   }
+  /* This must follow the shared tablet rule above so portrait keeps a clear
+     lane for the page's right-turn control instead of letting the library
+     overlap it. */
+  @media (orientation: portrait) {
+    html[data-layout-mode="tablet"] .workspace-grid {
+      grid-template-columns: minmax(0, 1fr) minmax(136px, min(24vw, 176px)) !important;
+      gap: 28px !important;
+    }
+    html[data-layout-mode="tablet"] .photo-library-shell {
+      min-width: 136px !important;
+      max-width: min(24vw, 176px) !important;
+      margin-left: 0 !important;
+    }
+    html[data-layout-mode="tablet"] .photo-library {
+      min-width: 136px;
+      max-width: min(24vw, 176px);
+      width: min(24vw, 176px);
+    }
+  }
   /* A user-selected PC layout must remain desktop-like on a narrow iPad viewport. */
   @media (max-width: 760px) {
     html[data-layout-mode="desktop"] .compact-toolbar .toolbar-popover .popover-body {
@@ -3067,6 +3109,7 @@ function setOptionText(select, map) {
     const opt = select && select.querySelector(`option[value="${value}"]`);
     if (opt) opt.textContent = text;
   });
+  refreshNativeSelectLabel(select);
 }
 
 function replaceSelectOptionText(select, map) {
@@ -3092,6 +3135,15 @@ function refreshNativeSelectLabel(select) {
   void select.offsetWidth;
   select.value = selectedValue;
   if (selectedIndex >= 0) select.selectedIndex = selectedIndex;
+  // WebKit may paint the old closed-select label in the same frame as a
+  // language switch. A second, event-free restoration handles that cache.
+  requestAnimationFrame(() => {
+    if (!select.isConnected || select.value !== selectedValue) return;
+    select.selectedIndex = -1;
+    void select.offsetWidth;
+    select.value = selectedValue;
+    if (selectedIndex >= 0) select.selectedIndex = selectedIndex;
+  });
 }
 
 function syncPhotoEffectSelectLabels(expanded = false) {
@@ -3574,6 +3626,10 @@ let suppressPopoverClickUntil = 0;
 
 function isNonMousePointer(e) {
   return e && e.type && e.type.startsWith('pointer') && e.pointerType !== 'mouse';
+}
+
+function usesTouchPhotoTray() {
+  return isTabletLayout() || /Android/i.test(navigator.userAgent || '');
 }
 
 function addTouchStart(el, handler) {
@@ -4927,9 +4983,9 @@ function renderTray() {
   photos.forEach(p => {
     const item = document.createElement('div');
     item.className = 'tray-item';
-    item.draggable = uiState.layoutMode !== 'tablet';
+    item.draggable = !usesTouchPhotoTray();
     item.addEventListener('dragstart', (e) => {
-      if (uiState.layoutMode === 'tablet') {
+      if (usesTouchPhotoTray()) {
         e.preventDefault();
         return;
       }
@@ -4937,8 +4993,14 @@ function renderTray() {
       e.dataTransfer.effectAllowed = 'copy';
     });
     item.addEventListener('click', (e) => {
-      if (e.target.closest('.remove-btn') || uiState.layoutMode !== 'tablet') return;
-      addPhotoToPage(book.pages[currentPageIdx], p, 0.5, 0.5);
+      if (e.target.closest('.remove-btn') || !usesTouchPhotoTray()) return;
+      e.preventDefault();
+      e.stopPropagation();
+      // Resolve from the current library first. Android may deliver a delayed
+      // click after a short scroll, so never reuse a photo already detached.
+      const photo = photosById[p._id];
+      if (!photo) return;
+      addPhotoToPage(book.pages[currentPageIdx], photo, 0.5, 0.5);
       renderPage();
       updateJsonView();
     });
@@ -5917,6 +5979,52 @@ function preparePopoverHost(detail) {
   if (host) host.classList.add('popover-active');
 }
 
+function positionTabletPopover(detail, body) {
+  if (!isTabletLayout() || !detail.open || !body) return;
+  const trigger = detail.querySelector('summary');
+  if (!trigger) return;
+  const margin = 10;
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const triggerRect = trigger.getBoundingClientRect();
+
+  // First measure with a safe full-viewport bound, then anchor the panel to
+  // its own control. This also prevents the background/reset panels from
+  // being cropped on portrait iPads.
+  body.style.left = margin + 'px';
+  body.style.right = 'auto';
+  body.style.top = margin + 'px';
+  body.style.bottom = 'auto';
+  body.style.width = 'auto';
+  body.style.minWidth = '0';
+  body.style.maxWidth = Math.max(220, viewportWidth - margin * 2) + 'px';
+  body.style.maxHeight = Math.max(160, viewportHeight - margin * 2) + 'px';
+  body.style.overflowY = 'auto';
+
+  const bodyRect = body.getBoundingClientRect();
+  const width = Math.min(bodyRect.width, viewportWidth - margin * 2);
+  const below = viewportHeight - triggerRect.bottom - margin - 8;
+  const above = triggerRect.top - margin - 8;
+  const preferAbove = below < Math.min(250, bodyRect.height) && above > below;
+  const availableHeight = Math.max(160, preferAbove ? above : below);
+  const top = preferAbove
+    ? Math.max(margin, triggerRect.top - Math.min(bodyRect.height, availableHeight) - 8)
+    : Math.min(viewportHeight - availableHeight - margin, triggerRect.bottom + 8);
+  const left = Math.max(margin, Math.min(viewportWidth - width - margin, triggerRect.left));
+
+  body.style.width = width + 'px';
+  body.style.left = left + 'px';
+  body.style.top = Math.max(margin, top) + 'px';
+  body.style.maxHeight = availableHeight + 'px';
+}
+
+function repositionOpenTabletPopovers() {
+  if (!isTabletLayout()) return;
+  document.querySelectorAll('.toolbar-popover[open], .ai-assistant-popover[open]').forEach(detail => {
+    positionTabletPopover(detail, detail.querySelector('.popover-body, .ai-assistant-body'));
+  });
+}
+
 document.querySelectorAll('.toolbar-popover, .ai-assistant-popover').forEach(detail => {
   const summary = detail.querySelector('summary');
   if (summary) {
@@ -5945,22 +6053,14 @@ document.querySelectorAll('.toolbar-popover, .ai-assistant-popover').forEach(det
       body.style.left = '';
       body.style.top = '';
       body.style.right = '';
-      if (isTabletLayout() && !detail.closest('.compact-toolbar')) {
-        requestAnimationFrame(() => {
-          if (!detail.open) return;
-          const trigger = detail.querySelector('summary');
-          const triggerRect = trigger.getBoundingClientRect();
-          const bodyRect = body.getBoundingClientRect();
-          const left = Math.max(8, Math.min(window.innerWidth - bodyRect.width - 8, triggerRect.left));
-          const top = Math.max(8, Math.min(window.innerHeight - Math.min(bodyRect.height, window.innerHeight - 16) - 8, triggerRect.bottom + 8));
-          body.style.left = left + 'px';
-          body.style.top = top + 'px';
-          body.style.right = 'auto';
-        });
-      }
+      if (isTabletLayout()) requestAnimationFrame(() => positionTabletPopover(detail, body));
     }
   });
 });
+
+window.addEventListener('resize', () => requestAnimationFrame(repositionOpenTabletPopovers));
+window.addEventListener('orientationchange', () => setTimeout(repositionOpenTabletPopovers, 120));
+window.visualViewport?.addEventListener('resize', () => requestAnimationFrame(repositionOpenTabletPopovers));
 
 let photoLibraryDrag = null;
 function startPhotoLibraryMove(e) {
