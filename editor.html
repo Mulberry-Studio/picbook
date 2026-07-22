@@ -2220,6 +2220,7 @@
     min-width: 148px !important;
     max-width: min(28vw, 192px) !important;
     justify-self: start;
+    margin-left: -20px !important;
   }
   /* A user-selected PC layout must remain desktop-like on a narrow iPad viewport. */
   @media (max-width: 760px) {
@@ -3473,6 +3474,21 @@ function isTabletLayout() {
   return uiState.layoutMode === 'tablet';
 }
 
+function detectedLayoutMode() {
+  const userAgent = navigator.userAgent || '';
+  const platform = navigator.platform || '';
+  // iPadOS may present a desktop-like Mac UA, but it still exposes touch
+  // points. Do not use generic touch detection so Windows touch laptops stay
+  // in the PC layout by default.
+  const isIPad = /iPad/i.test(userAgent)
+    || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return isIPad ? 'tablet' : 'desktop';
+}
+
+function applyDetectedLayoutMode() {
+  uiState.layoutMode = detectedLayoutMode();
+}
+
 function enforceTabletAutoLayoutSizing() {
   const body = document.querySelector('#autoLayoutPopover .auto-layout-body');
   if (!body) return;
@@ -4194,7 +4210,9 @@ function loadImageUrl(url) {
 
 function applyPhotoLibraryState() {
   const tabletMode = uiState.layoutMode === 'tablet';
-  const maxWidth = tabletMode ? Math.max(168, Math.min(360, window.innerWidth - 188)) : 360;
+  const maxWidth = tabletMode
+    ? Math.max(148, Math.min(192, Math.floor(window.innerWidth * .28)))
+    : 360;
   uiState.photoLibraryWidth = Math.max(132, Math.min(maxWidth, uiState.photoLibraryWidth || 224));
   if (tabletMode) {
     uiState.photoLibraryX = 0;
@@ -4359,6 +4377,7 @@ function applyPersistedState(state) {
   nextPageId = Number.isFinite(state.nextPageId) ? state.nextPageId : book.pages.length;
   currentPageIdx = Math.max(0, Math.min(state.currentPageIdx || 0, book.pages.length - 1));
   uiState = { ...DEFAULT_UI_STATE, ...(state.uiState || {}) };
+  applyDetectedLayoutMode();
   if (!state.uiState || state.uiState.photoLibraryWidth == null || state.uiState.photoLibraryWidth === 190) uiState.photoLibraryWidth = 224;
   customFonts = Array.isArray(state.customFonts) ? state.customFonts : [];
   autoBackgroundMaps = Array.isArray(state.autoBackgroundMaps) ? state.autoBackgroundMaps.slice(-24) : [];
@@ -4389,6 +4408,7 @@ function applyLocalPreferences(state) {
   if (!state || state.storageMode !== 'preferences') return false;
   if (!book || !Array.isArray(book.pages)) return false;
   uiState = { ...DEFAULT_UI_STATE, ...(state.uiState || {}) };
+  applyDetectedLayoutMode();
   if (!state.uiState || state.uiState.photoLibraryWidth == null || state.uiState.photoLibraryWidth === 190) uiState.photoLibraryWidth = 224;
   if (state.pageSizeKey && PAGE_RATIOS[state.pageSizeKey]) {
     book.pageSizeKey = state.pageSizeKey;
@@ -8622,6 +8642,7 @@ window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     updateTabletToolbarMetrics();
+    if (isTabletLayout()) applyPhotoLibraryState();
     if (book) renderPage();
     if (preview3d.classList.contains('active')) {
       resetStPageFlipPreview();
@@ -8632,6 +8653,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('orientationchange', () => {
   setTimeout(() => {
     updateTabletToolbarMetrics();
+    if (isTabletLayout()) applyPhotoLibraryState();
     if (preview3d.classList.contains('active')) {
       resetStPageFlipPreview();
       renderBookPreview();
@@ -8650,6 +8672,7 @@ if (pendingLocalPreferences) {
   applyLocalPreferences(pendingLocalPreferences);
   pendingLocalPreferences = null;
 }
+applyDetectedLayoutMode();
 renderTray();
 renderPage();
 applyLanguage();

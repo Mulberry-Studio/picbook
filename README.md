@@ -2,7 +2,7 @@
 
 Picbook是一个单文件、纯静态的本地图画书编辑工具。当前编辑器入口位于：
 
-'editor.html`
+`editor.html`
 
 仓库根目录的 `index.html` 会自动跳转到编辑器，方便用 GitHub Pages 展示。
 
