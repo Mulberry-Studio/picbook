@@ -3175,10 +3175,22 @@ function setText(selector, text) {
 }
 
 function setOptionText(select, map) {
+  if (!select) return;
   Object.entries(map).forEach(([value, text]) => {
-    const opt = select && select.querySelector(`option[value="${value}"]`);
+    const opt = select.querySelector(`option[value="${value}"]`);
     if (opt) opt.textContent = text;
   });
+  // WebKit(Safari/iPadOS) 原生 select 的"收起态"显示标签有独立缓存，只改
+  // option.textContent 有时候不会让浏览器重新读取这份缓存，导致收起来显示的文字
+  // 跟实际语言对不上（展开下拉框看选项是对的，收起来那一行却是切换前的语言）。
+  // 短暂切换 disabled 会强制 WebKit 重新计算收起态标签；桌面 Chrome/Firefox 这步
+  // 是无副作用的空跑。切换过程中记录并恢复原本选中的 value，避免意外被重置。
+  const previousValue = select.value;
+  const wasDisabled = select.disabled;
+  select.disabled = true;
+  void select.offsetHeight; // 强制同步重排，确保 disabled=true 先被浏览器实际应用
+  select.disabled = wasDisabled;
+  if (select.value !== previousValue) select.value = previousValue;
 }
 
 function replaceSelectOptionText(select, map) {
@@ -3581,58 +3593,14 @@ function iPadMirrorSelects() {
 }
 
 function syncIPadSelectValueMirrors() {
-  const layerId = 'iosSelectValueLayer';
-  let layer = document.getElementById(layerId);
-  if (!isIPadBrowser()) {
-    document.documentElement.removeAttribute('data-ios-select-mirror');
-    document.documentElement.removeAttribute('data-ios-photo-clip');
-    layer?.remove();
-    iPadMirrorSelects().forEach(select => select.classList.remove('ios-select-mirror-target'));
-    return;
-  }
-  document.documentElement.dataset.iosSelectMirror = 'true';
-  document.documentElement.dataset.iosPhotoClip = 'true';
-  if (!layer) {
-    layer = document.createElement('div');
-    layer.id = layerId;
-    document.body.appendChild(layer);
-  }
-  const targets = [...iPadMirrorSelects()];
-  const live = new Set(targets);
-  [...layer.children].forEach(node => {
-    if (!live.has(node._select)) node.remove();
-  });
-  targets.forEach((select, index) => {
-    let mirror = [...layer.children].find(node => node._select === select);
-    const rect = select.getBoundingClientRect();
-    if (!mirror) {
-      const computed = getComputedStyle(select);
-      mirror = document.createElement('span');
-      mirror.className = 'ios-select-value';
-      mirror._select = select;
-      mirror.style.font = computed.font;
-      mirror.style.letterSpacing = computed.letterSpacing;
-      mirror.style.textAlign = computed.textAlign;
-      mirror.style.color = computed.color;
-      layer.appendChild(mirror);
-      select.classList.add('ios-select-mirror-target');
-      ['blur', 'input', 'change'].forEach(eventName => select.addEventListener(eventName, () => {
-        requestAnimationFrame(syncIPadSelectValueMirrors);
-        setTimeout(syncIPadSelectValueMirrors, 80);
-      }));
-    }
-    const option = select.selectedOptions && select.selectedOptions[0];
-    mirror.textContent = option ? option.textContent : '';
-    // iPad Safari may keep a native select focused after its picker closes.
-    // Never hide the visual value for focus alone: the mirror is pointer-free
-    // and the native picker still opens above it.
-    mirror.hidden = !rect.width || !rect.height;
-    mirror.style.left = `${Math.round(rect.left + 10)}px`;
-    mirror.style.top = `${Math.round(rect.top)}px`;
-    mirror.style.width = `${Math.max(0, Math.round(rect.width - 30))}px`;
-    mirror.style.height = `${Math.round(rect.height)}px`;
-    mirror.style.zIndex = String(3300 + index);
-  });
+  // Do not mask the native closed-select text. The iPad visual overlay was
+  // unreliable in Safari and could leave a control looking empty. setOptionText
+  // now asks WebKit to repaint the native caption in place instead.
+  document.getElementById('iosSelectValueLayer')?.remove();
+  document.documentElement.removeAttribute('data-ios-select-mirror');
+  iPadMirrorSelects().forEach(select => select.classList.remove('ios-select-mirror-target'));
+  if (isIPadBrowser()) document.documentElement.dataset.iosPhotoClip = 'true';
+  else document.documentElement.removeAttribute('data-ios-photo-clip');
 }
 
 function detectedLayoutMode() {
@@ -6364,7 +6332,18 @@ function createLayoutPhotoObject(page, photo, slot, idx) {
 
 function frameForLayout(templateKey, idx, page, slot, photoCount) {
   const source = TEMPLATE_FRAME_POOLS[templateKey] || (templateKey === 'mosaic' ? COLLAGE_FRAMES : PHOTO_FRAMES);
-  const used = new Set((page.objects || []).map(obj => obj.frame).filter(Boolean));
+  const currentFrames = new Set((page.objects || []).map(obj => obj.frame).filter(Boolean));
+  let previousFrames = [];
+  // Prefer a completely new adjacent-page frame set. When a dense page makes
+  // that impossible, still avoid repeating the frame in the same slot on the
+  // preceding page before relaxing the rule further.
+  if (book && Array.isArray(book.pages)) {
+    const pageIdx = book.pages.indexOf(page);
+    if (pageIdx > 0) {
+      const prevPage = book.pages[pageIdx - 1];
+      previousFrames = (prevPage?.objects || []).map(obj => obj.frame).filter(Boolean);
+    }
+  }
   const slotArea = slot ? slot.w * slot.h : 1;
   const filteredSource = source.filter(frame => {
     if (photoCount >= 5 && !SIMPLE_AUTO_FRAMES.includes(frame)) return false;
@@ -6373,8 +6352,12 @@ function frameForLayout(templateKey, idx, page, slot, photoCount) {
     return true;
   });
   const safeSource = filteredSource.length ? filteredSource : SIMPLE_AUTO_FRAMES;
-  const available = safeSource.filter(frame => !used.has(frame));
-  const pool = available.length ? available : safeSource;
+  const previousSet = new Set(previousFrames);
+  const strictPool = safeSource.filter(frame => !currentFrames.has(frame) && !previousSet.has(frame));
+  const previousSlotFrame = previousFrames.length ? previousFrames[idx % previousFrames.length] : null;
+  const slotSafePool = safeSource.filter(frame => !currentFrames.has(frame) && frame !== previousSlotFrame);
+  const currentPageSafePool = safeSource.filter(frame => !currentFrames.has(frame));
+  const pool = strictPool.length ? strictPool : (slotSafePool.length ? slotSafePool : (currentPageSafePool.length ? currentPageSafePool : safeSource));
   const offset = Math.floor(Math.random() * pool.length);
   return pool[(idx + offset) % pool.length];
 }
